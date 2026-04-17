@@ -9,9 +9,13 @@ import SwiftUI
 
 @main
 struct RandomFilterApp: App {
+    
+    @StateObject private var router = AppRouter()
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
+                .environmentObject(router)
         }
     }
 }
