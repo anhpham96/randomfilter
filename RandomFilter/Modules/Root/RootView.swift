@@ -17,10 +17,15 @@ struct RootView: View {
             SplashView()
         case .onboarding:
             OnboardingView()
-        case .home:
+        case .dashboard:
             Text("Home")
         case .paywall:
-            Text("Paywall")
+            PaywallView(onClose: {
+                print("Close")
+                withAnimation {
+                    router.route = .dashboard
+                }
+            })
         }
     }
 }

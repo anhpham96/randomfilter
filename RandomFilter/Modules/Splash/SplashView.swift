@@ -81,7 +81,7 @@ private extension SplashView {
             .overlay {
                 RoundedRectangle(cornerRadius: 40)
                 .stroke(
-                    Color.borderSecondary,
+                    Color.purplePrimary,
                     lineWidth: 7
                 )
             }
@@ -101,7 +101,7 @@ private extension SplashView {
     }
     
     var progressBar: some View {
-        ProgressView(progress: $viewModel.progress, duration: viewModel.duration, progressBarColor: Color.backgroundPrimary500)
+        ProgressBarView(progress: $viewModel.progress, duration: viewModel.duration, progressBarColor: Color.backgroundPrimary500)
     }
 }
 
@@ -132,5 +132,5 @@ private extension SplashView {
 
 #Preview {
     SplashView()
-        .environmentObject(AppRouter())
+        .environmentObject(AppRouter(purchaseManager: PurchaseManager()))
 }

@@ -22,7 +22,7 @@ struct SocialMediaBoxView: View {
         )
         .overlay {
             RoundedRectangle(cornerRadius: 18)
-                .stroke(Color.borderSecondary, lineWidth: 3)
+                .stroke(Color.purplePrimary, lineWidth: 3)
         }
         .padding(.vertical, 20)
     }
