@@ -9,8 +9,13 @@ import SwiftUI
 
 struct HomeView: View {
         
+    @StateObject var cameraManager: CameraManager = CameraManager()
+    
     var body: some View {
-       CameraView()
+        ZStack {
+            CameraView(camera: cameraManager)
+            HomeControlsView(cameraManager: cameraManager)
+        }
             
             
     }

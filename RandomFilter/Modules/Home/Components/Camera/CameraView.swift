@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CameraView: View {
-    @StateObject private var camera = CameraManager()
+    @ObservedObject var camera: CameraManager
        
     var body: some View {
         CameraPreview(session: camera.session)
@@ -23,5 +23,5 @@ struct CameraView: View {
 }
 
 #Preview {
-    CameraView()
+    CameraView(camera: CameraManager())
 }
