@@ -18,22 +18,11 @@ struct CameraPreview: UIViewRepresentable {
         
         let previewLayer = AVCaptureVideoPreviewLayer(session: session)
         previewLayer.videoGravity = .resizeAspectFill
+        previewLayer.frame = UIScreen.main.bounds
         
         view.layer.addSublayer(previewLayer)
-        context.coordinator.previewLayer = previewLayer
-        
         return view
     }
     
-    func updateUIView(_ uiView: UIView, context: Context) {
-        context.coordinator.previewLayer?.frame = uiView.bounds
-    }
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
-    }
-    
-    class Coordinator {
-        var previewLayer: AVCaptureVideoPreviewLayer?
-    }
+    func updateUIView(_ uiView: UIView, context: Context) {}
 }
