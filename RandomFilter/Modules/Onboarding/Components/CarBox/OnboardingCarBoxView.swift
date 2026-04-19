@@ -25,23 +25,14 @@ struct OnboardingCarBoxView: View {
     var carsStack: some View {
         ZStack {
             ForEach(items.indices, id: \.self) { index in
-                let offsetIndex = index - selectedIndex
-                let xOffset: CGFloat = CGFloat(offsetIndex) * 150
-                let scale: CGFloat = offsetIndex == 0 ? 0.9 : 0.4
-                Image(items[index])
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 200, height: 100)
-                    .scaleEffect(scale)
-                    .offset(x: xOffset)
-                    .zIndex(offsetIndex == 0 ? 1 : 0)
-                    .animation(.spring(response: 0.35, dampingFraction: 0.75), value: selectedIndex)
-                    .onTapGesture {
-                        selectedIndex = index
-                    }
+                OnboardingCarItemView(imageName: items[index],
+                            isSelected: index == selectedIndex,
+                            offsetIndex: index - selectedIndex) {
+                    selectedIndex = index
+                }
             }
         }
-        .frame(maxWidth: .infinity) // 👈 full ngang
+        .frame(maxWidth: .infinity)
         .frame(height: 140)
     }
     

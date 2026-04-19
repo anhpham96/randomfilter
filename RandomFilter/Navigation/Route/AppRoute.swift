@@ -10,5 +10,6 @@ enum AppRoute {
     case splash
     case onboarding
     case paywall
-    case home
+    case dashboard
+    
 }

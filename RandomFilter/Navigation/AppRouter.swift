@@ -12,18 +12,28 @@ final class AppRouter: ObservableObject {
     
     @Published var route: AppRoute = .splash
     @AppStorage("isFirstTimeOpened") var isFirstTimeOpened: Bool = true
-
+    
+    private let purchaseManager: PurchaseManager
+    
+    init(purchaseManager: PurchaseManager) {
+        self.purchaseManager = purchaseManager
+    }
+    
     func getRouteAfterSplash() -> AppRoute {
-        isFirstTimeOpened = true
         if isFirstTimeOpened {
             return .onboarding
         } else {
-            return .home
+            return purchaseManager.isPremium ? .dashboard : .paywall
+            
         }
     }
     
     func finishOnboarding() {
         isFirstTimeOpened = false
         route = .paywall
+    }
+    
+    func navigateToDashboard() {
+        route = .dashboard
     }
 }

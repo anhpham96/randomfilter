@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ProgressView: View {
+struct ProgressBarView: View {
     
     @Binding var progress: CGFloat
     
@@ -33,5 +33,5 @@ struct ProgressView: View {
 #Preview {
     @Previewable @State var progress: CGFloat = 0.4
 
-    ProgressView(progress: $progress)
+    ProgressBarView(progress: $progress)
 }
