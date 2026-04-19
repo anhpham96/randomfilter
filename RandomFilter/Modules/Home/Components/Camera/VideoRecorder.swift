@@ -9,13 +9,11 @@
 import AVFoundation
 import CoreImage
 
-import AVFoundation
-import CoreImage
+import UIKit
 
 final class VideoRecorder {
     
     // MARK: - Public
-    
     private(set) var isRecording = false
     private(set) var outputURL: URL?
     
@@ -24,7 +22,6 @@ final class VideoRecorder {
     }
     
     // MARK: - Config
-    
     struct Config {
         var width: Int = 1080
         var height: Int = 1920
@@ -34,24 +31,20 @@ final class VideoRecorder {
     
     private var config = Config()
     
-    // MARK: - Queues
-    
-    private let writerQueue = DispatchQueue(label: "video.writer.queue", qos: .userInitiated)
+    // MARK: - Queue (IMPORTANT)
+    private let recordQueue = DispatchQueue(label: "video.record.queue", qos: .userInitiated)
     
     // MARK: - Writer
-    
     private var writer: AVAssetWriter?
     private var input: AVAssetWriterInput?
+    private var audioInput: AVAssetWriterInput?
     private var adaptor: AVAssetWriterInputPixelBufferAdaptor?
     
     private var startTime: CMTime?
-    private var warmUpBuffer: CVPixelBuffer?
-    
     private var width: Int = 1080
     private var height: Int = 1920
     
     // MARK: - Setup
-    
     func prepare(config: Config = Config()) {
         self.config = config
         self.width = config.width
@@ -59,9 +52,8 @@ final class VideoRecorder {
     }
     
     // MARK: - Start
-    
     func start() {
-        writerQueue.async {
+        recordQueue.async {
             guard !self.isRecording else { return }
             
             let url = FileManager.default.temporaryDirectory
@@ -70,23 +62,21 @@ final class VideoRecorder {
             do {
                 let writer = try AVAssetWriter(url: url, fileType: .mp4)
                 
-                let compression: [String: Any] = [
-                    AVVideoAverageBitRateKey: self.config.bitrate
-                ]
-                
-                let settings: [String: Any] = [
+                // VIDEO
+                let videoSettings: [String: Any] = [
                     AVVideoCodecKey: self.config.codec,
                     AVVideoWidthKey: self.width,
                     AVVideoHeightKey: self.height,
-                    AVVideoCompressionPropertiesKey: compression
+                    AVVideoCompressionPropertiesKey: [
+                        AVVideoAverageBitRateKey: self.config.bitrate
+                    ]
                 ]
                 
-                let input = AVAssetWriterInput(
+                let videoInput = AVAssetWriterInput(
                     mediaType: .video,
-                    outputSettings: settings
+                    outputSettings: videoSettings
                 )
-                
-                input.expectsMediaDataInRealTime = true
+                videoInput.expectsMediaDataInRealTime = true
                 
                 let attrs: [String: Any] = [
                     kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
@@ -95,26 +85,41 @@ final class VideoRecorder {
                 ]
                 
                 let adaptor = AVAssetWriterInputPixelBufferAdaptor(
-                    assetWriterInput: input,
+                    assetWriterInput: videoInput,
                     sourcePixelBufferAttributes: attrs
                 )
                 
-                guard writer.canAdd(input) else { return }
-                writer.add(input)
+                // AUDIO
+                let audioSettings: [String: Any] = [
+                    AVFormatIDKey: kAudioFormatMPEG4AAC,
+                    AVNumberOfChannelsKey: 1,
+                    AVSampleRateKey: 44100,
+                    AVEncoderBitRateKey: 128000
+                ]
+                
+                let audioInput = AVAssetWriterInput(
+                    mediaType: .audio,
+                    outputSettings: audioSettings
+                )
+                audioInput.expectsMediaDataInRealTime = true
+                
+                // ADD
+                guard writer.canAdd(videoInput) else { return }
+                writer.add(videoInput)
+                
+                if writer.canAdd(audioInput) {
+                    writer.add(audioInput)
+                }
                 
                 writer.startWriting()
                 
-                // warm up buffer (fix lag frame đầu)
-                if let pool = adaptor.pixelBufferPool {
-                    CVPixelBufferPoolCreatePixelBuffer(nil, pool, &self.warmUpBuffer)
-                }
-                
                 self.writer = writer
-                self.input = input
+                self.input = videoInput
+                self.audioInput = audioInput
                 self.adaptor = adaptor
-                self.startTime = nil
                 self.outputURL = url
                 self.isRecording = true
+                self.startTime = nil
                 
             } catch {
                 print("Writer error:", error)
@@ -122,11 +127,9 @@ final class VideoRecorder {
         }
     }
     
-    // MARK: - Append (NO CIIMAGE RENDER HERE)
-    
+    // MARK: - Video
     func append(pixelBuffer: CVPixelBuffer, at time: CMTime) {
-        writerQueue.async {
-            
+        recordQueue.async {
             guard self.isRecording,
                   let writer = self.writer,
                   let input = self.input,
@@ -144,30 +147,42 @@ final class VideoRecorder {
         }
     }
     
-    // MARK: - Stop
-    
-    func stop(completion: @escaping (URL?) -> Void) {
-        writerQueue.async {
+    // MARK: - Audio
+    func appendAudio(sampleBuffer: CMSampleBuffer) {
+        recordQueue.async {
+            guard self.isRecording,
+                  let audioInput = self.audioInput,
+                  audioInput.isReadyForMoreMediaData else {
+                return
+            }
             
+            audioInput.append(sampleBuffer)
+        }
+    }
+    
+    // MARK: - Stop
+    func stop(completion: @escaping (URL?) -> Void) {
+        recordQueue.async {
             guard self.isRecording,
                   let writer = self.writer,
-                  let input = self.input else {
+                  let videoInput = self.input else {
                 DispatchQueue.main.async { completion(nil) }
                 return
             }
             
             self.isRecording = false
             
-            input.markAsFinished()
+            videoInput.markAsFinished()
+            self.audioInput?.markAsFinished()
             
             writer.finishWriting {
                 let url = writer.outputURL
                 
                 self.writer = nil
                 self.input = nil
+                self.audioInput = nil
                 self.adaptor = nil
                 self.startTime = nil
-                self.warmUpBuffer = nil
                 
                 DispatchQueue.main.async {
                     completion(url)

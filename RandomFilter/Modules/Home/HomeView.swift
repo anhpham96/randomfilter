@@ -16,6 +16,11 @@ struct HomeView: View {
             CameraView(camera: cameraManager)
             HomeControlsView(cameraManager: cameraManager)
         }
+        .sheet(isPresented: $cameraManager.showPreview) {
+            if let url = cameraManager.recordedURL {
+                VideoPreviewView(url: url)
+            }
+        }
             
             
     }

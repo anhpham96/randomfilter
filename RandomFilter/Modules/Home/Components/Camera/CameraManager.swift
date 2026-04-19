@@ -27,6 +27,9 @@ final class CameraManager: NSObject, ObservableObject {
     @Published var currentPosition: AVCaptureDevice.Position = .back
     @Published var isRecording = false
     
+    @Published var recordedURL: URL?
+    @Published var showPreview = false
+    
     let durationValues: [Float] = [15, 30, 60, 120]
     
     // Preview stream (UI only)
@@ -43,6 +46,8 @@ final class CameraManager: NSObject, ObservableObject {
     
     private var currentInput: AVCaptureDeviceInput?
     private let videoOutput = AVCaptureVideoDataOutput()
+    private let audioOutput = AVCaptureAudioDataOutput()
+    
     private var previewContinuation: AsyncStream<CIImage>.Continuation?
     
     private let recorder = VideoRecorder()
@@ -61,9 +66,44 @@ final class CameraManager: NSObject, ObservableObject {
             self.session.beginConfiguration()
             self.session.sessionPreset = .high
             
-            self.setupInput(position: .back)
-            self.setupOutput()
+            // CAMERA
+            guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera,
+                                                        for: .video,
+                                                        position: .back),
+                  let videoInput = try? AVCaptureDeviceInput(device: camera),
+                  self.session.canAddInput(videoInput) else {
+                return
+            }
             
+            self.session.addInput(videoInput)
+
+            // MIC
+            guard let mic = AVCaptureDevice.default(for: .audio),
+                let audioInput = try? AVCaptureDeviceInput(device: mic),
+                self.session.canAddInput(audioInput) else {
+                return
+            }
+                        
+            self.session.addInput(audioInput)
+                        
+
+            // VIDEO OUTPUT
+            self.videoOutput.videoSettings = [
+                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
+            ]
+                        
+            self.videoOutput.setSampleBufferDelegate(self, queue: self.recordQueue)
+                        
+            if self.session.canAddOutput(self.videoOutput) {
+                self.session.addOutput(self.videoOutput)
+            }
+                        
+            // AUDIO OUTPUT
+            self.audioOutput.setSampleBufferDelegate(self, queue: self.recordQueue)
+                        
+            if self.session.canAddOutput(self.audioOutput) {
+                self.session.addOutput(self.audioOutput)
+            }
             self.session.commitConfiguration()
         }
     }
@@ -85,19 +125,19 @@ final class CameraManager: NSObject, ObservableObject {
         }
     }
     
-    private func setupOutput() {
-        videoOutput.videoSettings = [
-            kCVPixelBufferPixelFormatTypeKey as String:
-                kCVPixelFormatType_32BGRA
-        ]
-        
-        videoOutput.alwaysDiscardsLateVideoFrames = true
-        
-        videoOutput.setSampleBufferDelegate(self, queue: sessionQueue)
-        
-        guard session.canAddOutput(videoOutput) else { return }
-        session.addOutput(videoOutput)
-    }
+//    private func setupOutput() {
+//        videoOutput.videoSettings = [
+//            kCVPixelBufferPixelFormatTypeKey as String:
+//                kCVPixelFormatType_32BGRA
+//        ]
+//        
+//        videoOutput.alwaysDiscardsLateVideoFrames = true
+//        
+//        videoOutput.setSampleBufferDelegate(self, queue: sessionQueue)
+//        
+//        guard session.canAddOutput(videoOutput) else { return }
+//        session.addOutput(videoOutput)
+//    }
     
     // MARK: - Control
     
@@ -134,6 +174,15 @@ final class CameraManager: NSObject, ObservableObject {
     func stopRecord() {
         recorder.stop { url in
             print("Saved:", url ?? "")
+            
+            DispatchQueue.main.async {
+                self.isRecording = false
+                        
+                if let url = url {
+                    self.recordedURL = url
+                    self.showPreview = true
+                }
+            }
         }
         
         DispatchQueue.main.async {
@@ -144,28 +193,40 @@ final class CameraManager: NSObject, ObservableObject {
 
 // MARK: - SampleBuffer Delegate
 
-extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
+extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate,
+                         AVCaptureAudioDataOutputSampleBufferDelegate {
     
     func captureOutput(_ output: AVCaptureOutput,
                        didOutput sampleBuffer: CMSampleBuffer,
                        from connection: AVCaptureConnection) {
         
-        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-            return
+        // 🎥 VIDEO
+        if output is AVCaptureVideoDataOutput {
+            
+            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+                return
+            }
+            
+            let time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+            let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+            
+            previewContinuation?.yield(ciImage)
+            
+            if isRecording {
+                recorder.append(pixelBuffer: pixelBuffer, at: time)
+            }
         }
         
-        let time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-        let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-        
-        // 1. Preview only
-        previewContinuation?.yield(ciImage)
-        
-        // 2. Record ONLY pixelBuffer (no CI render)
-        if isRecording {
-            recorder.append(pixelBuffer: pixelBuffer, at: time)
+        // 🎤 AUDIO (MISSING PART)
+        else if output is AVCaptureAudioDataOutput {
+            
+            if isRecording {
+                recorder.appendAudio(sampleBuffer: sampleBuffer)
+            }
         }
     }
 }
+
 
 extension CameraManager {
     func switchCamera() {
@@ -247,75 +308,3 @@ extension CameraManager {
         }
     }
 }
-//// MARK: - Switch Camera
-//
-//func switchCamera() {
-//    sessionQueue.async {
-//        guard let currentInput = self.currentInput else { return }
-//        
-//        let newPosition: AVCaptureDevice.Position =
-//            (currentInput.device.position == .back) ? .front : .back
-//        
-//        guard let newDevice = AVCaptureDevice.default(.builtInWideAngleCamera,
-//                                                      for: .video,
-//                                                      position: newPosition),
-//              let newInput = try? AVCaptureDeviceInput(device: newDevice) else {
-//            return
-//        }
-//        
-//        self.session.beginConfiguration()
-//        
-//        self.session.removeInput(currentInput)
-//        
-//        if self.session.canAddInput(newInput) {
-//            self.session.addInput(newInput)
-//            self.currentInput = newInput
-//            
-//            DispatchQueue.main.async {
-//                self.currentPosition = newPosition
-//                self.isTorchOn = false // reset torch
-//            }
-//        } else {
-//            self.session.addInput(currentInput)
-//        }
-//        
-//        self.session.commitConfiguration()
-//    }
-//}
-//
-//// MARK: - Torch
-//
-//func setTorch(isOn: Bool) {
-//    sessionQueue.async {
-//        guard let device = self.currentInput?.device,
-//              device.hasTorch else {
-//            return
-//        }
-//        
-//        do {
-//            try device.lockForConfiguration()
-//            
-//            if isOn {
-//                try device.setTorchModeOn(level: AVCaptureDevice.maxAvailableTorchLevel)
-//            } else {
-//                device.torchMode = .off
-//            }
-//            
-//            device.unlockForConfiguration()
-//            
-//            DispatchQueue.main.async {
-//                self.isTorchOn = isOn
-//            }
-//            
-//        } catch {
-//            print("Torch error: \(error)")
-//        }
-//    }
-//}
-//
-//func toggleTorch() {
-//    guard let device = currentInput?.device,
-//          device.hasTorch else { return }
-//    
-//    setTorch(isOn: device.torchMode != .on)
-//}

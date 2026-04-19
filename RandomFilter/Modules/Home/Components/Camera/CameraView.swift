@@ -19,6 +19,7 @@ struct CameraView: View {
             .onDisappear {
                 camera.stop()
             }
+          
        }
 }
 
