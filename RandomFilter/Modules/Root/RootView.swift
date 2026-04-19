@@ -18,10 +18,9 @@ struct RootView: View {
         case .onboarding:
             OnboardingView()
         case .dashboard:
-            Text("Home")
+            DashboardView()
         case .paywall:
             PaywallView(onClose: {
-                print("Close")
                 withAnimation {
                     router.route = .dashboard
                 }
