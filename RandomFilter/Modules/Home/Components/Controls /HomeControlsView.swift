@@ -26,7 +26,11 @@ struct HomeControlsView: View {
             durationStack
             
             ZStack {
-                Text("Recording")
+                RecordButton(isRecording: cameraManager.isRecording) {
+                    cameraManager.isRecording ?
+                    cameraManager.stopRecord() :
+                    cameraManager.startRecord()
+                }
                 
                 HStack {
                     Text("Filter")
@@ -47,7 +51,7 @@ private extension HomeControlsView {
     
     var premiumButton: some View {
         CameraControlButton(systemName: "crown.fill", action: {
-            cameraManager.toggleTorch()
+           // cameraManager.toggleTorch()
         })
     }
     
@@ -55,13 +59,13 @@ private extension HomeControlsView {
     var flashButton: some View {
         let systemName = cameraManager.isTorchOn ? "bolt.fill" : "bolt.slash.fill"
         CameraControlButton(systemName: systemName, action: {
-            cameraManager.toggleTorch()
+           // cameraManager.toggleTorch()
         })
     }
     
     var switchCameraButton: some View {
         CameraControlButton(systemName: "arrow.triangle.2.circlepath", action: {
-            cameraManager.switchCamera()
+            //cameraManager.switchCamera()
         })
     }
     
