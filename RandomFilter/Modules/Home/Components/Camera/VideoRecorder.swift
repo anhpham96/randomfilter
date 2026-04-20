@@ -149,15 +149,15 @@ final class VideoRecorder {
     
     // MARK: - Audio
     func appendAudio(sampleBuffer: CMSampleBuffer) {
-        recordQueue.async {
-            guard self.isRecording,
-                  let audioInput = self.audioInput,
-                  audioInput.isReadyForMoreMediaData else {
-                return
-            }
-            
-            audioInput.append(sampleBuffer)
-        }
+//        recordQueue.async {
+//            guard self.isRecording,
+//                  let audioInput = self.audioInput,
+//                  audioInput.isReadyForMoreMediaData else {
+//                return
+//            }
+//            
+//            audioInput.append(sampleBuffer)
+//        }
     }
     
     // MARK: - Stop
