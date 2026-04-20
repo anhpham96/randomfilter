@@ -39,7 +39,7 @@ struct CameraPreview: UIViewRepresentable {
     
     class Coordinator {
         var previewLayer: AVCaptureVideoPreviewLayer?
-        var cameraManager: CameraManager?
+        var cameraManager: HomeViewModel?
         var lastZoomFactor: CGFloat = 1.0
         
 //        @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {

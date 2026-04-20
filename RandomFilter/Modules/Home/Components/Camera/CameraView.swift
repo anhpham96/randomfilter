@@ -8,21 +8,21 @@
 import SwiftUI
 
 struct CameraView: View {
-    @ObservedObject var camera: CameraManager
+    @ObservedObject var viewModel: HomeViewModel
        
     var body: some View {
-        CameraPreview(session: camera.session)
+        CameraPreview(session: viewModel.sessionManager.session)
             .ignoresSafeArea()
             .onAppear {
-                camera.start()
+                viewModel.start()
             }
             .onDisappear {
-                camera.stop()
+                viewModel.stop()
             }
           
        }
 }
 
 #Preview {
-    CameraView(camera: CameraManager())
+    CameraView(viewModel: HomeViewModel())
 }

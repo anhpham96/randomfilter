@@ -9,15 +9,15 @@ import SwiftUI
 
 struct HomeView: View {
         
-    @StateObject var cameraManager: CameraManager = CameraManager()
+    @StateObject var viewModel: HomeViewModel = HomeViewModel()
     
     var body: some View {
         ZStack {
-            CameraView(camera: cameraManager)
-            HomeControlsView(cameraManager: cameraManager)
+            CameraView(viewModel: viewModel)
+            HomeControlsView(viewModel: viewModel)
         }
-        .sheet(isPresented: $cameraManager.showPreview) {
-            if let url = cameraManager.recordedURL {
+        .sheet(isPresented: $viewModel.showPreview) {
+            if let url = viewModel.recordedURL {
                 VideoPreviewView(url: url)
             }
         }

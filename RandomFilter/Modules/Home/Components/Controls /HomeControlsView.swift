@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HomeControlsView: View {
     
-    @ObservedObject var cameraManager: CameraManager
+    @ObservedObject var viewModel: HomeViewModel
     
     
     var body: some View {
@@ -23,15 +23,15 @@ struct HomeControlsView: View {
             .padding(.horizontal, 20)
             Spacer()
             
-            if !cameraManager.isRecording {
+            if !viewModel.isRecording {
                 durationStack
             }
             
             ZStack {
-                RecordButton(isRecording: cameraManager.isRecording, progress: cameraManager.progress) {
-                    cameraManager.isRecording ?
-                    cameraManager.stopRecord() :
-                    cameraManager.startRecord()
+                RecordButton(isRecording: viewModel.isRecording, progress: viewModel.progress) {
+                    viewModel.isRecording ?
+                    viewModel.stopRecord() :
+                    viewModel.startRecord()
                 }
                 
                 HStack {
@@ -59,25 +59,25 @@ private extension HomeControlsView {
     
     @ViewBuilder
     var flashButton: some View {
-        let systemName = cameraManager.isTorchOn ? "bolt.fill" : "bolt.slash.fill"
+        let systemName = viewModel.isTorchOn ? "bolt.fill" : "bolt.slash.fill"
         CameraControlButton(systemName: systemName, action: {
-           cameraManager.toggleTorch()
+            viewModel.toggleTorch()
         })
     }
     
     var switchCameraButton: some View {
         CameraControlButton(systemName: "arrow.triangle.2.circlepath", action: {
-            cameraManager.switchCamera()
+            viewModel.switchCamera()
         })
     }
     
     var durationStack: some View {
         HStack(spacing: 8) {
-            ForEach(cameraManager.durationValues, id: \.self) { value in
+            ForEach(viewModel.durationValues, id: \.self) { value in
                DurationView(value: value, isSelected: isDurationSelected(value))
                     .onTapGesture {
                         withAnimation {
-                            cameraManager.selectedDuration = value
+                            viewModel.selectedDuration = value
                         }
                     }
             }
@@ -88,12 +88,12 @@ private extension HomeControlsView {
 
 private extension HomeControlsView {
     func isDurationSelected(_ value: Float) -> Bool {
-        return cameraManager.selectedDuration == value
+        return viewModel.selectedDuration == value
     }
 }
 
 #Preview {
-    HomeControlsView(cameraManager: CameraManager())
+    HomeControlsView(viewModel: HomeViewModel())
         .background(
             
             Image(.onboardingScreenshotTwo)
