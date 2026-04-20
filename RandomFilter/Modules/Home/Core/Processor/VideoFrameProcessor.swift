@@ -37,42 +37,97 @@ final class VideoFrameProcessor {
         didStopForDuration = false
     }
     
+    // MARK: - Public entry point (MAIN PIPELINE)
     func process(pixelBuffer: CVPixelBuffer,
-                 time: CMTime,
-                 isRecording: Bool) {
+                time: CMTime,
+                isRecording: Bool) {
+            
+            let image = makeCIImage(from: pixelBuffer)
+            
+            sendPreview(image)
+            
+            guard isRecording else { return }
+            
+            handleRecordingStartIfNeeded(time: time)
+            
+            updateProgress(time: time)
+            
+            checkAutoStop(time: time)
+            
+            recordFrame(image: image, time: time)
+    }
+    
+}
+
+private extension VideoFrameProcessor {
+    
+    func sendPreview(_ image: CIImage) {
+        previewContinuation?.yield(image.oriented(.right))
+    }
+}
+
+private extension VideoFrameProcessor {
+    
+    func handleRecordingStartIfNeeded(time: CMTime) {
+        guard recordStartTime == nil else { return }
         
-        let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-        let oriented = ciImage.oriented(.right)
-        
-        previewContinuation?.yield(oriented)
-        
-        guard isRecording else { return }
-        
-        if recordStartTime == nil {
-            recordStartTime = time
-            onFirstFrame?(time)
-        }
-        
+        recordStartTime = time
+        onFirstFrame?(time)
+    }
+}
+
+private extension VideoFrameProcessor {
+    
+    func updateProgress(time: CMTime) {
         guard let start = recordStartTime else { return }
         
         let elapsed = CMTimeGetSeconds(CMTimeSubtract(time, start))
         onProgress?(elapsed)
+    }
+}
+
+private extension VideoFrameProcessor {
+    
+    func checkAutoStop(time: CMTime) {
+        guard let start = recordStartTime else { return }
+        guard !didStopForDuration else { return }
         
-        if elapsed >= selectedDuration, !didStopForDuration {
-            didStopForDuration = true
-            onStopRequested?()
-            return
-        }
+        let elapsed = CMTimeGetSeconds(CMTimeSubtract(time, start))
         
+        guard elapsed >= selectedDuration else { return }
+        
+        didStopForDuration = true
+        onStopRequested?()
+    }
+}
+
+private extension VideoFrameProcessor {
+    
+    func recordFrame(image: CIImage, time: CMTime) {
         guard let buffer = recorder.createPixelBuffer() else { return }
         
-        ciContext.render(
-            oriented,
-            to: buffer,
-            bounds: oriented.extent,
-            colorSpace: CGColorSpaceCreateDeviceRGB()
-        )
+        render(image: image, into: buffer)
         
         recorder.append(pixelBuffer: buffer, at: time)
+    }
+}
+
+private extension VideoFrameProcessor {
+    
+    func makeCIImage(from pixelBuffer: CVPixelBuffer) -> CIImage {
+        
+        let image = CIImage(cvPixelBuffer: pixelBuffer)
+        let oriented = image.oriented(.right)
+        
+        return oriented
+    }
+    
+    func render(image: CIImage, into buffer: CVPixelBuffer) {
+        ciContext.render(
+            image,
+            to: buffer,
+            bounds: image.extent,
+            colorSpace: CGColorSpaceCreateDeviceRGB()
+        )
     }
 }
