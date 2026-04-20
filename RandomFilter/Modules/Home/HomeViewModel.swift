@@ -25,6 +25,8 @@ final class HomeViewModel: NSObject, ObservableObject {
     @Published var recordedURL: URL?
     @Published var showPreview = false
     
+    @Published var permissionState: PermissionState = .idle
+    
     let durationValues: [Float] = [15, 30, 60, 120]
     
     var progress: CGFloat {
@@ -35,6 +37,7 @@ final class HomeViewModel: NSObject, ObservableObject {
     
     let sessionManager = CameraSessionManager()
     let recorder = VideoRecorder()
+    let permission = CameraPermissionService()
     
     private let ciContext = CIContext()
     private let recordQueue = DispatchQueue(label: "camera.record.queue", qos: .userInitiated)
@@ -127,7 +130,24 @@ final class HomeViewModel: NSObject, ObservableObject {
     
     func toggleTorch() {
         sessionManager.toggleTorch { _ in
+            
+        }
+    }
+    
+    func prepareCamera() async {
+        let cameraOK = await permission.requestCamera()
+        let micOK = await permission.requestMic()
         
+        await MainActor.run {
+            if cameraOK && micOK {
+                self.permissionState = .granted
+            } else {
+                self.permissionState = .denied
+            }
+        }
+        
+        if cameraOK && micOK {
+            start()
         }
     }
 }

@@ -15,15 +15,23 @@ struct HomeView: View {
         ZStack {
             CameraView(viewModel: viewModel)
             HomeControlsView(viewModel: viewModel)
+            
+            if viewModel.permissionState == .denied {
+                PermissionDeniedView()
+            }
+        }
+        .onAppear {
+            Task {
+                await viewModel.prepareCamera()
+            }
         }
         .sheet(isPresented: $viewModel.showPreview) {
             if let url = viewModel.recordedURL {
                 VideoPreviewView(url: url)
             }
         }
-            
-            
     }
+    
 }
 
 #Preview {
