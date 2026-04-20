@@ -76,6 +76,7 @@ final class CameraManager: NSObject, ObservableObject {
             }
             
             self.session.addInput(videoInput)
+            self.currentInput = videoInput
 
             // MIC
             guard let mic = AVCaptureDevice.default(for: .audio),
@@ -108,22 +109,22 @@ final class CameraManager: NSObject, ObservableObject {
         }
     }
     
-    private func setupInput(position: AVCaptureDevice.Position) {
-        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera,
-                                                   for: .video,
-                                                   position: position),
-              let input = try? AVCaptureDeviceInput(device: device),
-              self.session.canAddInput(input) else {
-            return
-        }
-        
-        self.session.addInput(input)
-        self.currentInput = input
-        
-        DispatchQueue.main.async {
-            self.currentPosition = position
-        }
-    }
+//    private func setupInput(position: AVCaptureDevice.Position) {
+//        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera,
+//                                                   for: .video,
+//                                                   position: position),
+//              let input = try? AVCaptureDeviceInput(device: device),
+//              self.session.canAddInput(input) else {
+//            return
+//        }
+//        
+//        self.session.addInput(input)
+//        self.currentInput = input
+//        
+//        DispatchQueue.main.async {
+//            self.currentPosition = position
+//        }
+//    }
     
 //    private func setupOutput() {
 //        videoOutput.videoSettings = [
@@ -217,7 +218,6 @@ extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate,
             }
         }
         
-        // 🎤 AUDIO (MISSING PART)
         else if output is AVCaptureAudioDataOutput {
             
             if isRecording {
@@ -230,13 +230,13 @@ extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate,
 
 extension CameraManager {
     func switchCamera() {
-        guard !self.isRecording else { return }
+        guard !isRecording else { return }
         
         sessionQueue.async {
             guard let currentInput = self.currentInput else { return }
             
             let newPosition: AVCaptureDevice.Position =
-                (currentInput.device.position == .back) ? .front : .back
+                currentInput.device.position == .back ? .front : .back
             
             guard let newDevice = AVCaptureDevice.default(.builtInWideAngleCamera,
                                                           for: .video,
@@ -246,26 +246,22 @@ extension CameraManager {
             }
             
             self.session.beginConfiguration()
-            self.session.sessionPreset = .high
             
-            // remove old
             self.session.removeInput(currentInput)
             
-            // add new safely
             if self.session.canAddInput(newInput) {
                 self.session.addInput(newInput)
                 self.currentInput = newInput
-                
-                DispatchQueue.main.async {
-                    self.currentPosition = newPosition
-                    self.isTorchOn = false
-                }
             } else {
-                // rollback nếu fail
                 self.session.addInput(currentInput)
             }
             
             self.session.commitConfiguration()
+            
+            DispatchQueue.main.async {
+                self.currentPosition = newPosition
+                self.isTorchOn = false
+            }
         }
     }
     

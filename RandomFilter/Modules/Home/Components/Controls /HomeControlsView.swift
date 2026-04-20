@@ -59,13 +59,13 @@ private extension HomeControlsView {
     var flashButton: some View {
         let systemName = cameraManager.isTorchOn ? "bolt.fill" : "bolt.slash.fill"
         CameraControlButton(systemName: systemName, action: {
-           // cameraManager.toggleTorch()
+           cameraManager.toggleTorch()
         })
     }
     
     var switchCameraButton: some View {
         CameraControlButton(systemName: "arrow.triangle.2.circlepath", action: {
-            //cameraManager.switchCamera()
+            cameraManager.switchCamera()
         })
     }
     
