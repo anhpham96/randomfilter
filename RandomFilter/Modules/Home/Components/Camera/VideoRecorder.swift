@@ -18,7 +18,7 @@ final class VideoRecorder {
     private(set) var outputURL: URL?
     
     var isReady: Bool {
-        input?.isReadyForMoreMediaData ?? false
+        videoInput?.isReadyForMoreMediaData ?? false
     }
     
     // MARK: - Config
@@ -36,7 +36,7 @@ final class VideoRecorder {
     
     // MARK: - Writer
     private var writer: AVAssetWriter?
-    private var input: AVAssetWriterInput?
+    private var videoInput: AVAssetWriterInput?
     private var audioInput: AVAssetWriterInput?
     private var adaptor: AVAssetWriterInputPixelBufferAdaptor?
     
@@ -62,7 +62,7 @@ final class VideoRecorder {
             do {
                 let writer = try AVAssetWriter(url: url, fileType: .mp4)
                 
-                // VIDEO
+                // VIDEO INPUT
                 let videoSettings: [String: Any] = [
                     AVVideoCodecKey: self.config.codec,
                     AVVideoWidthKey: self.width,
@@ -111,10 +111,10 @@ final class VideoRecorder {
                     writer.add(audioInput)
                 }
                 
-                writer.startWriting()
+               writer.startWriting()
                 
                 self.writer = writer
-                self.input = videoInput
+                self.videoInput = videoInput
                 self.audioInput = audioInput
                 self.adaptor = adaptor
                 self.outputURL = url
@@ -127,37 +127,44 @@ final class VideoRecorder {
         }
     }
     
-    // MARK: - Video
+    // MARK: Video
     func append(pixelBuffer: CVPixelBuffer, at time: CMTime) {
         recordQueue.async {
             guard self.isRecording,
                   let writer = self.writer,
-                  let input = self.input,
-                  let adaptor = self.adaptor,
-                  input.isReadyForMoreMediaData else {
-                return
-            }
-            
+                  let input = self.videoInput,
+                  let adaptor = self.adaptor else { return }
+                
+                // 🔥 START SESSION (FIX CRASH)
             if self.startTime == nil {
+                if writer.status == .failed {
+                    print("❌ writer failed:", writer.error as Any)
+                    return
+                }
+                print("Start Session")
                 writer.startSession(atSourceTime: time)
                 self.startTime = time
             }
-            
+                
+            guard writer.status == .writing,
+                      input.isReadyForMoreMediaData else { return }
+                
             adaptor.append(pixelBuffer, withPresentationTime: time)
         }
     }
     
-    // MARK: - Audio
+    // MARK: Audio
     func appendAudio(sampleBuffer: CMSampleBuffer) {
-//        recordQueue.async {
-//            guard self.isRecording,
-//                  let audioInput = self.audioInput,
-//                  audioInput.isReadyForMoreMediaData else {
-//                return
-//            }
-//            
-//            audioInput.append(sampleBuffer)
-//        }
+        recordQueue.async {
+            guard self.isRecording,
+                self.startTime != nil,
+                let writer = self.writer,
+                let audioInput = self.audioInput,
+                writer.status == .writing,
+                audioInput.isReadyForMoreMediaData else { return }
+                
+                audioInput.append(sampleBuffer)
+        }
     }
     
     func createPixelBuffer() -> CVPixelBuffer? {
@@ -178,8 +185,16 @@ final class VideoRecorder {
         recordQueue.async {
             guard self.isRecording,
                   let writer = self.writer,
-                  let videoInput = self.input else {
+                  let videoInput = self.videoInput else {
                 DispatchQueue.main.async { completion(nil) }
+                return
+            }
+            
+            guard writer.status == .writing else {
+                self.cleanup()
+                DispatchQueue.main.async {
+                    completion(nil)
+                }
                 return
             }
             
@@ -191,16 +206,20 @@ final class VideoRecorder {
             writer.finishWriting {
                 let url = writer.outputURL
                 
-                self.writer = nil
-                self.input = nil
-                self.audioInput = nil
-                self.adaptor = nil
-                self.startTime = nil
+                self.cleanup()
                 
                 DispatchQueue.main.async {
                     completion(url)
                 }
             }
         }
+    }
+    
+    private func cleanup() {
+        self.writer = nil
+        self.videoInput = nil
+        self.audioInput = nil
+        self.adaptor = nil
+        self.startTime = nil
     }
 }

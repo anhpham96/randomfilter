@@ -11,11 +11,26 @@ import SwiftUI
 
 struct VideoPreviewView: View {
     let url: URL
+    
+    @State private var player: AVPlayer
+    
+    init(url: URL) {
+        self.url = url
+        _player = State(initialValue: AVPlayer(url: url))
+    }
 
     var body: some View {
-        VideoPlayer(player: AVPlayer(url: url))
+        VideoPlayer(player: player)
             .onAppear {
-                AVPlayer(url: url).play()
+                player.play()
+            }
+            .onDisappear {
+                player.pause()
             }
     }
 }
+
+#Preview {
+    VideoPreviewView(url: URL(string: "https://www.w3schools.com/html/mov_bbb.mp4")!)
+}
+

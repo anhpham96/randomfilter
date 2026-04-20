@@ -9,6 +9,7 @@ import SwiftUI
 struct RecordButton: View {
     
     let isRecording: Bool
+    let progress: CGFloat // 0 -> 1
     let action: () -> Void
     
     var body: some View {
@@ -18,6 +19,16 @@ struct RecordButton: View {
                 Circle()
                     .stroke(Color.white, lineWidth: 4)
                     .frame(width: 70, height: 70)
+                
+                if isRecording {
+                    // progress
+                    Circle()
+                        .trim(from: 0, to: progress)
+                        .stroke(Color.red, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                        .frame(width: 70, height: 70)
+                        .rotationEffect(.degrees(-90))
+                        .animation(.linear, value: progress)
+                }
                 
                 // bên trong
                 Circle()
