@@ -47,7 +47,7 @@ struct ResultView: View {
                     Text("Retry")
                 }
             }
-            .buttonStyle(.primaryBlack)
+            .buttonStyle(.primaryPurple)
         }
         .padding(25)
     }
