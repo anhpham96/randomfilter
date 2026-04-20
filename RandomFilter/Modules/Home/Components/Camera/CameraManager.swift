@@ -22,6 +22,8 @@ final class CameraManager: NSObject, ObservableObject {
     let session = AVCaptureSession()
     
     @Published var selectedDuration: Float = 15
+    @Published var currentDuration: Double = 0
+    
     @Published var isRunning = false
     @Published var isTorchOn = false
     @Published var currentPosition: AVCaptureDevice.Position = .back
@@ -66,6 +68,9 @@ final class CameraManager: NSObject, ObservableObject {
     
     private let recorder = VideoRecorder()
     
+    private var recordStartTime: CMTime?
+    private var didStopForDuration = false
+    
     // MARK: - Init
     
     override init() {
@@ -80,38 +85,38 @@ final class CameraManager: NSObject, ObservableObject {
             self.session.beginConfiguration()
             self.session.sessionPreset = .high
             
-            self.setupVideoInput()
-
-            // MIC
-            guard let mic = AVCaptureDevice.default(for: .audio),
-                let audioInput = try? AVCaptureDeviceInput(device: mic),
-                self.session.canAddInput(audioInput) else {
-                return
-            }
-                        
-            self.session.addInput(audioInput)
-                        
-
-            // VIDEO OUTPUT
-            self.videoOutput.videoSettings = [
-                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
-            ]
-                        
-            self.videoOutput.setSampleBufferDelegate(self, queue: self.recordQueue)
-                        
-            if self.session.canAddOutput(self.videoOutput) {
-                self.session.addOutput(self.videoOutput)
-            }
-                        
-            // AUDIO OUTPUT
-            self.audioOutput.setSampleBufferDelegate(self, queue: self.recordQueue)
-                        
-            if self.session.canAddOutput(self.audioOutput) {
-                self.session.addOutput(self.audioOutput)
-            }
+            self.setupInput()
+            self.setupOutput()
+            
             self.session.commitConfiguration()
         }
     }
+    
+    private func setupInput() {
+        self.setupVideoInput()
+        self.setupAudioInput()
+    }
+    
+private func setupOutput() {
+    
+    // VIDEO OUTPUT
+    self.videoOutput.videoSettings = [
+        kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
+    ]
+    
+    self.videoOutput.setSampleBufferDelegate(self, queue: self.recordQueue)
+    
+    if self.session.canAddOutput(self.videoOutput) {
+        self.session.addOutput(self.videoOutput)
+    }
+    
+    // AUDIO OUTPUT
+    self.audioOutput.setSampleBufferDelegate(self, queue: self.recordQueue)
+    
+    if self.session.canAddOutput(self.audioOutput) {
+        self.session.addOutput(self.audioOutput)
+    }
+}
     
     private func setupVideoInput() {
         // CAMERA
@@ -127,36 +132,17 @@ final class CameraManager: NSObject, ObservableObject {
         self.currentInput = videoInput
     }
     
-//    private func setupInput(position: AVCaptureDevice.Position) {
-//        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera,
-//                                                   for: .video,
-//                                                   position: position),
-//              let input = try? AVCaptureDeviceInput(device: device),
-//              self.session.canAddInput(input) else {
-//            return
-//        }
-//        
-//        self.session.addInput(input)
-//        self.currentInput = input
-//        
-//        DispatchQueue.main.async {
-//            self.currentPosition = position
-//        }
-//    }
-    
-//    private func setupOutput() {
-//        videoOutput.videoSettings = [
-//            kCVPixelBufferPixelFormatTypeKey as String:
-//                kCVPixelFormatType_32BGRA
-//        ]
-//        
-//        videoOutput.alwaysDiscardsLateVideoFrames = true
-//        
-//        videoOutput.setSampleBufferDelegate(self, queue: sessionQueue)
-//        
-//        guard session.canAddOutput(videoOutput) else { return }
-//        session.addOutput(videoOutput)
-//    }
+    private func setupAudioInput() {
+        // MIC
+        guard let mic = AVCaptureDevice.default(for: .audio),
+            let audioInput = try? AVCaptureDeviceInput(device: mic),
+            self.session.canAddInput(audioInput) else {
+            return
+        }
+                    
+        self.session.addInput(audioInput)
+                    
+    }
     
     // MARK: - Control
     
@@ -184,6 +170,9 @@ final class CameraManager: NSObject, ObservableObject {
         recorder.prepare(config: .init(width: 1080, height: 1920))
         
         recorder.start()
+        
+        recordStartTime = nil
+        didStopForDuration = false
         
         DispatchQueue.main.async {
             self.isRecording = true
@@ -227,12 +216,41 @@ extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate,
             }
             
             let time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+            
+            // ⏱ set start time (frame đầu tiên)
+            if recordStartTime == nil {
+                recordStartTime = time
+            }
+                    
+                    // ⏱ elapsed + limit duration
+            if let start = recordStartTime,
+                isRecording,
+                !didStopForDuration {
+                        
+                let elapsed = CMTimeSubtract(time, start)
+                let elapsedSeconds = CMTimeGetSeconds(elapsed)
+                        
+                // 📊 update UI realtime
+                DispatchQueue.main.async {
+                    self.currentDuration = min(elapsedSeconds, Double(self.selectedDuration))
+                }
+                        
+                        // ⛔ stop khi đủ duration
+                        if elapsedSeconds >= Double(selectedDuration) {
+                            didStopForDuration = true
+                            
+                            DispatchQueue.main.async {
+                                self.stopRecord()
+                            }
+                            
+                            return // 🚨 không ghi frame này nữa
+                        }
+                    }
+            
+            
             let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-            
-            // ✅ FIX ORIENTATION Ở ĐÂY
             let orientedImage = ciImage.oriented(.right) // back camera
-            
-            previewContinuation?.yield(ciImage)
+            previewContinuation?.yield(orientedImage)
             
             if isRecording {
                 guard let newBuffer = recorder.createPixelBuffer() else { return }

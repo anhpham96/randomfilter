@@ -23,7 +23,9 @@ struct HomeControlsView: View {
             .padding(.horizontal, 20)
             Spacer()
             
-            durationStack
+            if !cameraManager.isRecording {
+                durationStack
+            }
             
             ZStack {
                 RecordButton(isRecording: cameraManager.isRecording) {
@@ -34,6 +36,7 @@ struct HomeControlsView: View {
                 
                 HStack {
                     Text("Filter")
+                    Text("\(cameraManager.currentDuration, specifier: "%.1f")s")
                     Spacer()
                     
                 }
