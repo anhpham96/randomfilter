@@ -26,7 +26,7 @@ struct HomeView: View {
         }
         .fullScreenCover(isPresented: $viewModel.isPaywallViewPresented) {
             PaywallView {
-                viewModel.isPaywallViewPresented = false 
+                viewModel.isPaywallViewPresented = false
             }
         }
     }

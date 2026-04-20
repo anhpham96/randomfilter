@@ -9,23 +9,26 @@ import SwiftUI
 
 struct ResultView: View {
     
-    let url: URL?
+    let url: URL
     @StateObject private var viewModel = ResultViewModel()
     
+    @EnvironmentObject var navigationState: NavigationState
+    
     var body: some View {
+        content
+            .navigationBarTitle("Result", displayMode: .inline)
+    }
+    
+    var content: some View {
         VStack {
             
-            if let url = url {
-                VideoPreviewView(url: url)
-                    .frame(width: 167, height: 263)
-                    .cornerRadius(14)
-            }
+            VideoPreviewView(url: url)
+                .frame(width: 167, height: 263)
+                .cornerRadius(14)
             
             Button {
-                if let url {
-                    Task {
-                        await viewModel.saveVideo(from: url)
-                    }
+                Task {
+                    await viewModel.saveVideo(from: url)
                 }
             } label: {
                 HStack {
@@ -37,7 +40,7 @@ struct ResultView: View {
             .buttonStyle(.primaryBlack)
             
             Button {
-                // retry logic
+                navigationState.popToRoot()
             } label: {
                 HStack {
                     Image(systemName: "arrow.clockwise")
@@ -69,5 +72,8 @@ struct ResultView: View {
 }
 
 #Preview {
-    ResultView(url: URL(string: "https://www.w3schools.com/html/mov_bbb.mp4")!)
+    NavigationStack {
+        ResultView(url: URL(string: "https://www.w3schools.com/html/mov_bbb.mp4")!)
+    }
+  
 }
