@@ -21,7 +21,8 @@ final class CameraSessionManager: NSObject {
     let audioOutput = AVCaptureAudioDataOutput()
     
     func configure(recordQueue: DispatchQueue,
-                   delegate: AVCaptureVideoDataOutputSampleBufferDelegate & AVCaptureAudioDataOutputSampleBufferDelegate) {
+                   delegate: AVCaptureVideoDataOutputSampleBufferDelegate &
+                              AVCaptureAudioDataOutputSampleBufferDelegate) {
         
         sessionQueue.async {
             self.session.beginConfiguration()
@@ -36,10 +37,10 @@ final class CameraSessionManager: NSObject {
     }
     
     private func setupVideoInput() {
-        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera,
+        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera,
                                                    for: .video,
                                                    position: .back),
-              let input = try? AVCaptureDeviceInput(device: camera),
+              let input = try? AVCaptureDeviceInput(device: device),
               session.canAddInput(input) else { return }
         
         session.addInput(input)
@@ -55,7 +56,8 @@ final class CameraSessionManager: NSObject {
     }
     
     private func setupOutputs(queue: DispatchQueue,
-                              delegate: AVCaptureVideoDataOutputSampleBufferDelegate & AVCaptureAudioDataOutputSampleBufferDelegate) {
+                              delegate: AVCaptureVideoDataOutputSampleBufferDelegate &
+                                         AVCaptureAudioDataOutputSampleBufferDelegate) {
         
         videoOutput.videoSettings = [
             kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
@@ -84,8 +86,7 @@ final class CameraSessionManager: NSObject {
         }
     }
     
-    func switchCamera(currentPosition: AVCaptureDevice.Position,
-                      completion: @escaping (AVCaptureDevice.Position) -> Void) {
+    func switchCamera() -> Void {
         
         sessionQueue.async {
             guard let currentInput = self.currentInput else { return }
@@ -111,7 +112,6 @@ final class CameraSessionManager: NSObject {
             
             self.session.commitConfiguration()
             
-            completion(newPosition)
         }
     }
     
@@ -133,6 +133,24 @@ final class CameraSessionManager: NSObject {
                 completion(isOn)
             } catch {
                 print(error)
+            }
+        }
+    }
+    
+    func toggleTorch(completion: @escaping (Bool) -> Void) {
+        sessionQueue.async {
+            guard let device = self.currentInput?.device,
+                  device.hasTorch else {
+                DispatchQueue.main.async {
+                    completion(false)
+                }
+                return
+            }
+            
+            let newValue = device.torchMode != .on
+            
+            self.setTorch(isOn: newValue) { _ in
+                completion(newValue)
             }
         }
     }

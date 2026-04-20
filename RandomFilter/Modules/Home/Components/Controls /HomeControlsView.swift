@@ -67,7 +67,7 @@ private extension HomeControlsView {
     
     var switchCameraButton: some View {
         CameraControlButton(systemName: "arrow.triangle.2.circlepath", action: {
-            viewModel.switchCamera()
+            viewModel.sessionManager.switchCamera()
         })
     }
     

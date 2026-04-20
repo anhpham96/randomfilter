@@ -17,10 +17,8 @@ final class HomeViewModel: NSObject, ObservableObject {
     
     @Published var selectedDuration: Float = 15
     @Published var currentDuration: Double = 0
-    
     @Published var isRunning = false
     @Published var isRecording = false
-    
     @Published var isTorchOn = false
     @Published var currentPosition: AVCaptureDevice.Position = .back
     
@@ -36,31 +34,58 @@ final class HomeViewModel: NSObject, ObservableObject {
     // MARK: - Components
     
     let sessionManager = CameraSessionManager()
-    let permission = CameraPermissionService()
     let recorder = VideoRecorder()
     
+    private let ciContext = CIContext()
     private let recordQueue = DispatchQueue(label: "camera.record.queue", qos: .userInitiated)
     
-    private var recordStartTime: CMTime?
-    private var didStopForDuration = false
-    
-    lazy var previewStream: AsyncStream<CIImage> = {
-        AsyncStream { self.previewContinuation = $0 }
-    }()
+    private let videoProcessor: VideoFrameProcessor
+    private let audioProcessor: AudioFrameProcessor
     
     private var previewContinuation: AsyncStream<CIImage>.Continuation?
     
-    private let ciContext = CIContext()
+    lazy var previewStream: AsyncStream<CIImage> = {
+        AsyncStream { continuation in
+            self.previewContinuation = continuation
+        }
+    }()
     
     // MARK: - Init
     
     override init() {
+        
+        self.videoProcessor = VideoFrameProcessor(
+            selectedDuration: 15,
+            recorder: recorder,
+            ciContext: ciContext
+        )
+        
+        self.audioProcessor = AudioFrameProcessor(recorder: recorder)
+        
         super.init()
+        
+        videoProcessor.previewContinuation = previewContinuation
+        
+        bindProcessor()
         
         sessionManager.configure(
             recordQueue: recordQueue,
             delegate: self
         )
+    }
+    
+    private func bindProcessor() {
+        
+        videoProcessor.onProgress = { [weak self] value in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                self.currentDuration = min(value, Double(self.selectedDuration))
+            }
+        }
+        
+        videoProcessor.onStopRequested = { [weak self] in
+            self?.stopRecord()
+        }
     }
     
     // MARK: - Control
@@ -75,36 +100,15 @@ final class HomeViewModel: NSObject, ObservableObject {
         isRunning = false
     }
     
-    func switchCamera() {
-        guard !isRecording else { return }
-        
-        sessionManager.switchCamera(currentPosition: currentPosition) { newPos in
-            DispatchQueue.main.async {
-                self.currentPosition = newPos
-                self.isTorchOn = false
-            }
-        }
-    }
-    
-    func toggleTorch() {
-        let newValue = !isTorchOn
-        
-        sessionManager.setTorch(isOn: newValue) { isOn in
-            DispatchQueue.main.async {
-                self.isTorchOn = isOn
-            }
-        }
-    }
-    
     // MARK: - Record
     
     func startRecord() {
         recorder.prepare(config: .init(width: 1080, height: 1920))
         recorder.start()
         
-        recordStartTime = nil
-        didStopForDuration = false
+        videoProcessor.reset()
         
+        currentDuration = 0
         isRecording = true
     }
     
@@ -120,6 +124,12 @@ final class HomeViewModel: NSObject, ObservableObject {
             }
         }
     }
+    
+    func toggleTorch() {
+        sessionManager.toggleTorch { _ in
+        
+        }
+    }
 }
 
 extension HomeViewModel: AVCaptureVideoDataOutputSampleBufferDelegate,
@@ -132,45 +142,21 @@ extension HomeViewModel: AVCaptureVideoDataOutputSampleBufferDelegate,
         if output is AVCaptureVideoDataOutput {
             
             guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-            
             let time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
             
-            let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-            let oriented = ciImage.oriented(.right)
-            
-            previewContinuation?.yield(oriented)
-            
-            guard isRecording else { return }
-            
-            if recordStartTime == nil {
-                recordStartTime = time
-            }
-            
-            let elapsed = CMTimeGetSeconds(CMTimeSubtract(time, recordStartTime!))
-            
-            DispatchQueue.main.async {
-                self.currentDuration = min(elapsed, Double(self.selectedDuration))
-            }
-            
-            if elapsed >= Double(selectedDuration) {
-                stopRecord()
-                return
-            }
-            
-            guard let newBuffer = recorder.createPixelBuffer() else { return }
-            
-            ciContext.render(oriented,
-                             to: newBuffer,
-                             bounds: oriented.extent,
-                             colorSpace: CGColorSpaceCreateDeviceRGB())
-            
-            recorder.append(pixelBuffer: newBuffer, at: time)
+            videoProcessor.process(
+                pixelBuffer: pixelBuffer,
+                time: time,
+                isRecording: isRecording
+            )
         }
         
         else if output is AVCaptureAudioDataOutput {
-            if isRecording {
-                recorder.appendAudio(sampleBuffer: sampleBuffer)
-            }
+            
+            audioProcessor.process(
+                sampleBuffer: sampleBuffer,
+                isRecording: isRecording
+            )
         }
     }
 }
