@@ -16,6 +16,8 @@ struct OnboardingStepView: View {
         VStack(spacing: 0) {
             topStack
             introduceTextView
+                .padding(.vertical, 20)
+            Spacer()
         }
     }
 }
@@ -23,7 +25,7 @@ struct OnboardingStepView: View {
 private extension OnboardingStepView {
 
     var topStack: some View {
-        ZStack {
+        ZStack(alignment: .center) {
             ZStack(alignment: .bottom) {
                 OnboardingScreenShotView(step: step)
                 topStackBlurView
@@ -94,7 +96,8 @@ private extension OnboardingStepView {
                     startRadius: 0,
                     endRadius: 400
                 )
-            )
+            ).ignoresSafeArea()
+        
     }
 
     var topStackBlurView: some View {

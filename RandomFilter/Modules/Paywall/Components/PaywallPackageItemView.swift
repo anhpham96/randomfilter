@@ -66,6 +66,18 @@ struct PaywallPackageItemView: View {
                         .offset(y: -10)
                 }
         }
+        .overlay {
+            if item.id == selectedItem?.id {
+                Image(.paywallSelectIcon)
+                    .resizable()
+                    .frame(width: 20, height: 20)
+                    .topAlignment()
+                    .trailingAlignment()
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 15)
+
+            }
+        }
     }
     
     var titleColor: Color {
@@ -95,8 +107,8 @@ struct PaywallPackageItemView: View {
 
 #Preview {
     HStack {
-        PaywallPackageItemView(item: .init(id: "A", displayName: "Yearly", price: 19.99, weeklyPrice: 0.38), selectedItem: nil)
-        PaywallPackageItemView(item: .init(id: "A", displayName: "Weekly", price: 3.99, isBestOffer: true), selectedItem: nil)
-        PaywallPackageItemView(item: .init(id: "A", displayName: "Montly", price: 5.99, weeklyPrice: 1.49), selectedItem: nil)
+        PaywallPackageItemView(item: .init(id: "A", displayName: "Yearly", price: 19.99, weeklyPrice: 0.38), selectedItem: .init(id: "A", displayName: "", price: 0))
+        PaywallPackageItemView(item: .init(id: "A", displayName: "Weekly", price: 3.99, isBestOffer: true), selectedItem: .init(id: "A", displayName: "", price: 0))
+        PaywallPackageItemView(item: .init(id: "A", displayName: "Montly", price: 5.99, weeklyPrice: 1.49), selectedItem: .init(id: "A", displayName: "", price: 0))
     }
 }

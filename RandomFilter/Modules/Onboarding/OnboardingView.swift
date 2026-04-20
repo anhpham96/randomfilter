@@ -20,24 +20,21 @@ struct OnboardingView: View {
     }
     
     var content: some View {
-        GeometryReader { geo in
-            VStack(spacing: 0) {
-                TabView(selection: $viewModel.onboardingStep) {
-                    ForEach(OnboardingStep.allCases) { step in
-                        OnboardingStepView(step: step)
-                            .ignoresSafeArea()
-                            .tag(step)
-                        }
-                }
-                .frame(height: geo.size.height*0.75)
-                .tabViewStyle(.page(indexDisplayMode: .never))
-                nextStack
-                    .topAlignment()
-                continueButton
+        VStack(spacing: 0) {
+            TabView(selection: $viewModel.onboardingStep) {
+                ForEach(OnboardingStep.allCases) { step in
+                    OnboardingStepView(step: step)
+                        .ignoresSafeArea()
+                        .tag(step)
+                    }
             }
-            .ignoresSafeArea(edges: .top)
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            nextStack
+            Spacer()
+            continueButton
         }
-        
+        .verticalScroll()
+        .ignoresSafeArea(edges: .top)
     }
 }
 

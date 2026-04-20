@@ -49,7 +49,7 @@ class PaywallViewModel: BaseViewModel {
             self.isLoading = false
             if let selectedItem = self.selectedItem {
                 purchaseManager.updatePackage(selectedItem)
-                event.send(.purchaseSuccessfully)
+                event.send(.close)
             }
         }
         

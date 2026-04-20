@@ -8,7 +8,6 @@
 
 enum PaywallEvent {
     case close
-    case purchaseSuccessfully
     case purchaseFailed
     case openRestore
 }

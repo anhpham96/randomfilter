@@ -14,6 +14,12 @@ struct DashboardView: View {
     var body: some View {
         NavigationStack(path: $navigationState.routes) {
             HomeView()
+                .navigationDestination(for: DashboardRoute.self) { route in
+                    switch route {
+                    case .result(let url):
+                        ResultView(url: url)
+                    }
+                }
         }.environmentObject(navigationState)
     }
 }

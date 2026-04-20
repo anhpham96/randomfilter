@@ -150,10 +150,7 @@ private extension PaywallView {
         switch event {
         case .close:
             onClose()
-        case .purchaseSuccessfully:
-            withAnimation {
-                appRouter.route = .dashboard
-            }
+        
         case .purchaseFailed:
             print("")
 

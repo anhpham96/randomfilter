@@ -8,12 +8,35 @@
 import SwiftUI
 
 struct HomeView: View {
-    
-    @StateObject private var camera = CameraManager()
-    
+        
+    @StateObject var viewModel: HomeViewModel = HomeViewModel()
+        
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        ZStack {
+            content
+                
+            if viewModel.permissionState == .denied {
+                PermissionDeniedView()
+            }
+        }
+        .onAppear {
+            Task {
+                await viewModel.prepareCamera()
+            }
+        }
+        .fullScreenCover(isPresented: $viewModel.isPaywallViewPresented) {
+            PaywallView {
+                viewModel.isPaywallViewPresented = false
+            }
+        }
     }
+    
+    @ViewBuilder
+    var content: some View {
+        CameraView(viewModel: viewModel)
+        HomeControlsView(viewModel: viewModel)
+    }
+    
 }
 
 #Preview {
