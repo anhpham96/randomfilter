@@ -9,7 +9,7 @@ import SwiftUI
 
 struct DurationView: View {
     
-    let value: Float
+    let value: Double
     let isSelected: Bool
     
     var body: some View {

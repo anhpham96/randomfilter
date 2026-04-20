@@ -15,7 +15,7 @@ final class HomeViewModel: NSObject, ObservableObject {
     
     // MARK: - State
     
-    @Published var selectedDuration: Float = 15
+    @Published var selectedDuration: Double = 15
     @Published var currentDuration: Double = 0
     @Published var isRunning = false
     @Published var isRecording = false
@@ -24,10 +24,11 @@ final class HomeViewModel: NSObject, ObservableObject {
     
     @Published var recordedURL: URL?
     @Published var showPreview = false
-    
     @Published var permissionState: PermissionState = .idle
     
-    let durationValues: [Float] = [15, 30, 60, 120]
+    @Published var isPaywallViewPresented: Bool = false
+    
+    let durationValues: [Double] = [15, 30, 60, 120]
     
     var progress: CGFloat {
         min(currentDuration / Double(selectedDuration), 1.0)
@@ -57,18 +58,14 @@ final class HomeViewModel: NSObject, ObservableObject {
     
     override init() {
         
-        self.videoProcessor = VideoFrameProcessor(
-            selectedDuration: 15,
+        self.videoProcessor = VideoFrameProcessor(selectedDuration: 15,
             recorder: recorder,
             ciContext: ciContext
         )
-        
         self.audioProcessor = AudioFrameProcessor(recorder: recorder)
         
         super.init()
-        
         videoProcessor.previewContinuation = previewContinuation
-        
         bindProcessor()
         
         sessionManager.configure(
@@ -132,6 +129,10 @@ final class HomeViewModel: NSObject, ObservableObject {
         sessionManager.toggleTorch { _ in
             
         }
+    }
+    
+    func switchCamera() {
+        
     }
     
     func prepareCamera() async {

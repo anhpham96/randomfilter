@@ -10,7 +10,7 @@ import SwiftUI
 struct HomeControlsView: View {
     
     @ObservedObject var viewModel: HomeViewModel
-    
+    @EnvironmentObject var purchaseManager: PurchaseManager
     
     var body: some View {
         VStack {
@@ -34,12 +34,12 @@ struct HomeControlsView: View {
                     viewModel.startRecord()
                 }
                 
-                HStack {
-                    Text("Filter")
-                    Spacer()
-                    
-                }
-                .padding(.horizontal, 25)
+//                HStack {
+//                    Text("Filter")
+//                    Spacer()
+//                    
+//                }
+//                .padding(.horizontal, 25)
             }
         }
     }
@@ -51,10 +51,16 @@ struct HomeControlsView: View {
 
 private extension HomeControlsView {
     
+    @ViewBuilder
     var premiumButton: some View {
-        CameraControlButton(systemName: "crown.fill", action: {
-           // cameraManager.toggleTorch()
-        })
+        if purchaseManager.isPremium {
+            EmptyView()
+        } else {
+            CameraControlButton(systemName: "crown.fill", action: {
+                viewModel.isPaywallViewPresented = true
+            })
+        }
+       
     }
     
     @ViewBuilder
@@ -87,7 +93,7 @@ private extension HomeControlsView {
 }
 
 private extension HomeControlsView {
-    func isDurationSelected(_ value: Float) -> Bool {
+    func isDurationSelected(_ value: Double) -> Bool {
         return viewModel.selectedDuration == value
     }
 }
@@ -101,4 +107,5 @@ private extension HomeControlsView {
                 .scaledToFill()
                 .ignoresSafeArea()
         )
+        .environmentObject(PurchaseManager())
 }

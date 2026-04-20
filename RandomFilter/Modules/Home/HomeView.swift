@@ -10,12 +10,11 @@ import SwiftUI
 struct HomeView: View {
         
     @StateObject var viewModel: HomeViewModel = HomeViewModel()
-    
+        
     var body: some View {
         ZStack {
-            CameraView(viewModel: viewModel)
-            HomeControlsView(viewModel: viewModel)
-            
+            content
+                
             if viewModel.permissionState == .denied {
                 PermissionDeniedView()
             }
@@ -25,11 +24,17 @@ struct HomeView: View {
                 await viewModel.prepareCamera()
             }
         }
-        .sheet(isPresented: $viewModel.showPreview) {
-            if let url = viewModel.recordedURL {
-                VideoPreviewView(url: url)
+        .fullScreenCover(isPresented: $viewModel.isPaywallViewPresented) {
+            PaywallView {
+                viewModel.isPaywallViewPresented = false 
             }
         }
+    }
+    
+    @ViewBuilder
+    var content: some View {
+        CameraView(viewModel: viewModel)
+        HomeControlsView(viewModel: viewModel)
     }
     
 }
