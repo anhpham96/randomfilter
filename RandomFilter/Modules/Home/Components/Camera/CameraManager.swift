@@ -39,6 +39,20 @@ final class CameraManager: NSObject, ObservableObject {
         }
     }()
     
+    private let ciContext: CIContext = {
+        guard let device = MTLCreateSystemDefaultDevice() else {
+            return CIContext(options: nil) // fallback CPU
+        }
+            
+        return CIContext(
+            mtlDevice: device,
+            options: [
+                .cacheIntermediates: false,
+                .priorityRequestLow: true
+            ]
+        )
+    }()
+    
     // MARK: - Private
     
     private let sessionQueue = DispatchQueue(label: "camera.session.queue", qos: .userInitiated)
@@ -66,17 +80,7 @@ final class CameraManager: NSObject, ObservableObject {
             self.session.beginConfiguration()
             self.session.sessionPreset = .high
             
-            // CAMERA
-            guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera,
-                                                        for: .video,
-                                                        position: .back),
-                  let videoInput = try? AVCaptureDeviceInput(device: camera),
-                  self.session.canAddInput(videoInput) else {
-                return
-            }
-            
-            self.session.addInput(videoInput)
-            self.currentInput = videoInput
+            self.setupVideoInput()
 
             // MIC
             guard let mic = AVCaptureDevice.default(for: .audio),
@@ -107,6 +111,20 @@ final class CameraManager: NSObject, ObservableObject {
             }
             self.session.commitConfiguration()
         }
+    }
+    
+    private func setupVideoInput() {
+        // CAMERA
+        guard let camera = AVCaptureDevice.default(.builtInWideAngleCamera,
+                                                    for: .video,
+                                                    position: .back),
+              let videoInput = try? AVCaptureDeviceInput(device: camera),
+              self.session.canAddInput(videoInput) else {
+            return
+        }
+        
+        self.session.addInput(videoInput)
+        self.currentInput = videoInput
     }
     
 //    private func setupInput(position: AVCaptureDevice.Position) {
@@ -211,10 +229,22 @@ extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate,
             let time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
             let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
             
+            // ✅ FIX ORIENTATION Ở ĐÂY
+            let orientedImage = ciImage.oriented(.right) // back camera
+            
             previewContinuation?.yield(ciImage)
             
             if isRecording {
-                recorder.append(pixelBuffer: pixelBuffer, at: time)
+                guard let newBuffer = recorder.createPixelBuffer() else { return }
+
+                ciContext.render(
+                    orientedImage,
+                    to: newBuffer,
+                    bounds: orientedImage.extent,
+                    colorSpace: CGColorSpaceCreateDeviceRGB()
+                )
+                
+                recorder.append(pixelBuffer: newBuffer, at: time)
             }
         }
         

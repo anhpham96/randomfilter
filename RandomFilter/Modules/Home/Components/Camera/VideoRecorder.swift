@@ -160,6 +160,19 @@ final class VideoRecorder {
 //        }
     }
     
+    func createPixelBuffer() -> CVPixelBuffer? {
+        guard let pool = adaptor?.pixelBufferPool else { return nil }
+        
+        var pixelBuffer: CVPixelBuffer?
+        let status = CVPixelBufferPoolCreatePixelBuffer(nil, pool, &pixelBuffer)
+        
+        if status != kCVReturnSuccess {
+            return nil
+        }
+        
+        return pixelBuffer
+    }
+    
     // MARK: - Stop
     func stop(completion: @escaping (URL?) -> Void) {
         recordQueue.async {
