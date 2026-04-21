@@ -15,13 +15,11 @@ struct RecordButton: View {
     var body: some View {
         Button(action: action) {
             ZStack {
-                // viền ngoài
                 Circle()
                     .stroke(Color.white, lineWidth: 4)
                     .frame(width: 70, height: 70)
                 
                 if isRecording {
-                    // progress
                     Circle()
                         .trim(from: 0, to: progress)
                         .stroke(Color.red, style: StrokeStyle(lineWidth: 4, lineCap: .round))
@@ -30,7 +28,6 @@ struct RecordButton: View {
                         .animation(.linear, value: progress)
                 }
                 
-                // bên trong
                 Circle()
                     .fill(isRecording ? Color.red : Color.white)
                     .frame(width: isRecording ? 30 : 55,

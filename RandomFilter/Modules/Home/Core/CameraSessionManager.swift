@@ -20,6 +20,12 @@ final class CameraSessionManager: NSObject {
     let videoOutput = AVCaptureVideoDataOutput()
     let audioOutput = AVCaptureAudioDataOutput()
     
+    var isFrontCamera: Bool {
+        currentInput?.device.position == .front
+    }
+    
+    @Published private(set) var cameraPosition: AVCaptureDevice.Position = .back
+    
     func configure(recordQueue: DispatchQueue,
                    delegate: AVCaptureVideoDataOutputSampleBufferDelegate &
                               AVCaptureAudioDataOutputSampleBufferDelegate) {
@@ -106,6 +112,8 @@ final class CameraSessionManager: NSObject {
             if self.session.canAddInput(newInput) {
                 self.session.addInput(newInput)
                 self.currentInput = newInput
+                
+                self.cameraPosition = newPosition
             } else {
                 self.session.addInput(currentInput)
             }

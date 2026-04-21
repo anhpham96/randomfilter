@@ -12,28 +12,46 @@ import Combine
 
 @MainActor
 final class ResultViewModel: BaseViewModel {
-    
-    enum SaveState {
-        case idle
-        case saving
-        case saved
-        case failed
-    }
+      
+    let url: URL
     
     @Published var state: SaveState = .idle
+    @Published var showErrorAlert = false
+    @Published var errorMessage: String = ""
     
-    func saveVideo(from url: URL) async {
+    let event = PassthroughSubject<ResultEvent, Never>()
+    
+    init(url: URL) {
+        self.url = url
+    }
+    
+    func tapSaveButton() async {
         guard state != .saving else { return }
-        
         state = .saving
-        
         do {
             try await saveToPhotoLibrary(fileURL: url)
             state = .saved
+            
+            removeLocalFile(url)
         } catch {
             state = .failed
+            errorMessage = error.localizedDescription
+            showErrorAlert = true
             print("Save error:", error)
         }
+    }
+    
+    func tapRetryButton() {
+        // reset state trước
+        state = .idle
+        showErrorAlert = false
+        errorMessage = ""
+        
+        // optional: dọn file cũ nếu bạn muốn đảm bảo sạch
+        removeLocalFile(url)
+        
+        event.send(.back)
+        
     }
     
     private func saveToPhotoLibrary(fileURL: URL) async throws {
@@ -47,5 +65,26 @@ final class ResultViewModel: BaseViewModel {
         try await PHPhotoLibrary.shared().performChanges {
             PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: fileURL)
         }
+    }
+    
+    private func removeLocalFile(_ url: URL) {
+        guard url.isFileURL else { return }
+        
+        do {
+            try FileManager.default.removeItem(at: url)
+            print("🗑️ Removed local file:", url)
+        } catch {
+            print("⚠️ Failed to remove file:", error)
+        }
+    }
+    
+    
+    
+    
+    enum SaveState {
+        case idle
+        case saving
+        case saved
+        case failed
     }
 }

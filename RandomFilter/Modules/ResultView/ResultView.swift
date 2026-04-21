@@ -9,9 +9,7 @@ import SwiftUI
 
 struct ResultView: View {
     
-    let url: URL
-    @StateObject private var viewModel = ResultViewModel()
-    
+    @StateObject var viewModel: ResultViewModel
     @EnvironmentObject var navigationState: NavigationState
     
     var body: some View {
@@ -21,35 +19,56 @@ struct ResultView: View {
     
     var content: some View {
         VStack {
-            
-            VideoPreviewView(url: url)
-                .frame(width: 167, height: 263)
-                .cornerRadius(14)
-            
-            Button {
-                Task {
-                    await viewModel.saveVideo(from: url)
-                }
-            } label: {
-                HStack {
-                    Image(systemName: iconName)
-                    Text(buttonTitle)
-                }
-            }
-            .disabled(viewModel.state == .saving)
-            .buttonStyle(.primaryBlack)
-            
-            Button {
-                navigationState.popToRoot()
-            } label: {
-                HStack {
-                    Image(systemName: "arrow.clockwise")
-                    Text("Retry")
-                }
-            }
-            .buttonStyle(.primaryPurple)
+            videoPreview
+            saveButton
+            retryButton
         }
         .padding(25)
+        .alert(isPresented: $viewModel.showErrorAlert) {
+            saveFailedAlert
+        }
+    }
+    
+    var videoPreview: some View {
+        VideoPreviewView(url: viewModel.url)
+            .frame(width: 167, height: 263)
+            .cornerRadius(14)
+        
+    }
+    
+    var saveButton: some View {
+        Button {
+            Task {
+                await viewModel.tapSaveButton()
+            }
+        } label: {
+            HStack {
+                Image(systemName: iconName)
+                Text(buttonTitle)
+            }
+        }
+        .disabled(viewModel.state == .saving || viewModel.state == .saved)
+        .buttonStyle(.primaryBlack)
+    }
+    
+    var retryButton: some View {
+        Button {
+            viewModel.tapRetryButton()
+        } label: {
+            HStack {
+                Image(systemName: "arrow.clockwise")
+                Text("Retry")
+            }
+        }
+        .buttonStyle(.primaryPurple)
+    }
+    
+    private var saveFailedAlert: Alert {
+        Alert(
+            title: Text("Save Failed"),
+            message: Text(viewModel.errorMessage),
+            dismissButton: .cancel(Text("OK"))
+        )
     }
     
     private var buttonTitle: String {
@@ -73,7 +92,7 @@ struct ResultView: View {
 
 #Preview {
     NavigationStack {
-        ResultView(url: URL(string: "https://www.w3schools.com/html/mov_bbb.mp4")!)
+        ResultView(viewModel: ResultViewModel(url: URL(string: "https://www.w3schools.com/html/mov_bbb.mp4")!))
     }
   
 }

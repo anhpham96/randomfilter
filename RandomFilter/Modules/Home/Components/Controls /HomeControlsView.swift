@@ -17,7 +17,10 @@ struct HomeControlsView: View {
             VStack {
                 premiumButton
                 flashButton
-                switchCameraButton
+                if !viewModel.isRecording {
+                    switchCameraButton
+                }
+                
             }
             .trailingAlignment()
             .padding(.horizontal, 20)

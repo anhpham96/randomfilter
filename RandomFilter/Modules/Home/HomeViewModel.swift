@@ -11,7 +11,7 @@ import AVFoundation
 import CoreImage
 import Combine
 
-final class HomeViewModel: NSObject, ObservableObject {
+final class HomeViewModel: BaseViewModel {
     
     // MARK: - State
     
@@ -60,7 +60,8 @@ final class HomeViewModel: NSObject, ObservableObject {
         
         self.videoProcessor = VideoFrameProcessor(selectedDuration: 15,
             recorder: recorder,
-            ciContext: ciContext
+            ciContext: ciContext,
+            isFrontCamera: sessionManager.isFrontCamera
         )
         self.audioProcessor = AudioFrameProcessor(recorder: recorder)
         
@@ -72,6 +73,11 @@ final class HomeViewModel: NSObject, ObservableObject {
             recordQueue: recordQueue,
             delegate: self
         )
+        
+        sessionManager.$cameraPosition
+            .sink { [weak self] position in
+                self?.videoProcessor.isFrontCamera = position == .front
+            }.store(in: &bag)
     }
     
     private func bindProcessor() {

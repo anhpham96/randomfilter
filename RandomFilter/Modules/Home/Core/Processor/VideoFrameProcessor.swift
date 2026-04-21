@@ -11,6 +11,7 @@ import CoreImage
 
 final class VideoFrameProcessor {
     
+    var isFrontCamera: Bool
     var previewContinuation: AsyncStream<CIImage>.Continuation?
     
     var onFirstFrame: ((CMTime) -> Void)?
@@ -26,10 +27,12 @@ final class VideoFrameProcessor {
     
     init(selectedDuration: Double,
          recorder: VideoRecorder,
-         ciContext: CIContext) {
+         ciContext: CIContext,
+         isFrontCamera: Bool) {
         self.selectedDuration = selectedDuration
         self.recorder = recorder
         self.ciContext = ciContext
+        self.isFrontCamera = isFrontCamera
     }
     
     func reset() {
@@ -62,7 +65,7 @@ final class VideoFrameProcessor {
 private extension VideoFrameProcessor {
     
     func sendPreview(_ image: CIImage) {
-        previewContinuation?.yield(image.oriented(.right))
+        previewContinuation?.yield(image)
     }
 }
 
@@ -117,9 +120,14 @@ private extension VideoFrameProcessor {
     func makeCIImage(from pixelBuffer: CVPixelBuffer) -> CIImage {
         
         let image = CIImage(cvPixelBuffer: pixelBuffer)
-        let oriented = image.oriented(.right)
-        
-        return oriented
+        if isFrontCamera {
+            return image
+                .oriented(.right)
+                .oriented(.upMirrored)
+        } else {
+            return image
+                .oriented(.right)
+        }
     }
     
     func render(image: CIImage, into buffer: CVPixelBuffer) {
