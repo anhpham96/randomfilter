@@ -14,6 +14,7 @@ struct ResultView: View {
     
     var body: some View {
         content
+            .onReceive(viewModel.event, perform: handleEvent)
             .navigationBarTitle("Result", displayMode: .inline)
     }
     
@@ -89,6 +90,16 @@ struct ResultView: View {
         }
     }
 }
+
+extension ResultView {
+    private func handleEvent(_ event: ResultEvent) {
+        switch event {
+        case .back:
+            navigationState.popToRoot()
+        }
+    }
+}
+
 
 #Preview {
     NavigationStack {

@@ -30,7 +30,9 @@ final class CameraSessionManager: NSObject {
                    delegate: AVCaptureVideoDataOutputSampleBufferDelegate &
                               AVCaptureAudioDataOutputSampleBufferDelegate) {
         
-        sessionQueue.async {
+        sessionQueue.async { [weak self] in
+            guard let self else { return }
+
             self.session.beginConfiguration()
             self.session.sessionPreset = .high
             
@@ -74,10 +76,14 @@ final class CameraSessionManager: NSObject {
         
         if session.canAddOutput(videoOutput) { session.addOutput(videoOutput) }
         if session.canAddOutput(audioOutput) { session.addOutput(audioOutput) }
+        
+        self.configureVideoConnection(position: currentInput?.device.position ?? .back)
     }
     
     func start() {
-        sessionQueue.async {
+        sessionQueue.async { [weak self] in
+            guard let self else { return }
+
             if !self.session.isRunning {
                 self.session.startRunning()
             }
@@ -85,7 +91,9 @@ final class CameraSessionManager: NSObject {
     }
     
     func stop() {
-        sessionQueue.async {
+        sessionQueue.async { [weak self] in
+            guard let self else { return }
+
             if self.session.isRunning {
                 self.session.stopRunning()
             }
@@ -94,7 +102,9 @@ final class CameraSessionManager: NSObject {
     
     func switchCamera() -> Void {
         
-        sessionQueue.async {
+        sessionQueue.async { [weak self] in
+            guard let self else { return }
+
             guard let currentInput = self.currentInput else { return }
             
             let newPosition: AVCaptureDevice.Position =
@@ -114,6 +124,8 @@ final class CameraSessionManager: NSObject {
                 self.currentInput = newInput
                 
                 self.cameraPosition = newPosition
+                
+                self.configureVideoConnection(position: newPosition)
             } else {
                 self.session.addInput(currentInput)
             }
@@ -162,4 +174,15 @@ final class CameraSessionManager: NSObject {
             }
         }
     }
-}
+    
+    private func configureVideoConnection(position: AVCaptureDevice.Position) {
+        guard let connection = videoOutput.connection(with: .video) else { return }
+        
+        // Rotation (portrait)
+        if connection.isVideoRotationAngleSupported(90) {
+            connection.videoRotationAngle = 90
+        }
+        
+        // Mirror for front camera
+        connection.isVideoMirrored = (position == .front)
+    }}

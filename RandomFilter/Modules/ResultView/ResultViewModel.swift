@@ -70,6 +70,12 @@ final class ResultViewModel: BaseViewModel {
     private func removeLocalFile(_ url: URL) {
         guard url.isFileURL else { return }
         
+        let path = url.path
+        
+        guard FileManager.default.fileExists(atPath: path) else {
+            return
+        }
+        
         do {
             try FileManager.default.removeItem(at: url)
             print("🗑️ Removed local file:", url)

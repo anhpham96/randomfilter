@@ -53,7 +53,8 @@ final class VideoRecorder {
     
     // MARK: - Start
     func start() {
-        recordQueue.async {
+        recordQueue.async { [weak self] in
+            guard let self else { return }
             guard !self.isRecording else { return }
             
             let url = FileManager.default.temporaryDirectory
@@ -129,7 +130,8 @@ final class VideoRecorder {
     
     // MARK: Video
     func append(pixelBuffer: CVPixelBuffer, at time: CMTime) {
-        recordQueue.async {
+        recordQueue.async { [weak self] in
+            guard let self else { return }
             guard self.isRecording,
                   let writer = self.writer,
                   let input = self.videoInput,
@@ -155,7 +157,8 @@ final class VideoRecorder {
     
     // MARK: Audio
     func appendAudio(sampleBuffer: CMSampleBuffer) {
-        recordQueue.async {
+        recordQueue.async { [weak self] in
+            guard let self else { return }
             guard self.isRecording,
                 self.startTime != nil,
                 let writer = self.writer,
@@ -182,7 +185,8 @@ final class VideoRecorder {
     
     // MARK: - Stop
     func stop(completion: @escaping (URL?) -> Void) {
-        recordQueue.async {
+        recordQueue.async { [weak self] in
+            guard let self else { return }
             guard self.isRecording,
                   let writer = self.writer,
                   let videoInput = self.videoInput else {

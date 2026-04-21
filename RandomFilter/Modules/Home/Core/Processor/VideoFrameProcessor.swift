@@ -120,14 +120,7 @@ private extension VideoFrameProcessor {
     func makeCIImage(from pixelBuffer: CVPixelBuffer) -> CIImage {
         
         let image = CIImage(cvPixelBuffer: pixelBuffer)
-        if isFrontCamera {
-            return image
-                .oriented(.right)
-                .oriented(.upMirrored)
-        } else {
-            return image
-                .oriented(.right)
-        }
+        return image
     }
     
     func render(image: CIImage, into buffer: CVPixelBuffer) {
