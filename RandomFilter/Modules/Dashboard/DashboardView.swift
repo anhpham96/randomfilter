@@ -17,7 +17,7 @@ struct DashboardView: View {
                 .navigationDestination(for: DashboardRoute.self) { route in
                     switch route {
                     case .result(let url):
-                        ResultView(url: url)
+                        ResultView(viewModel: ResultViewModel(url: url))
                     }
                 }
         }.environmentObject(navigationState)

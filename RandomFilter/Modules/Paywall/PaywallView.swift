@@ -67,7 +67,6 @@ extension PaywallView {
     
     var closeButton: some View {
         Button {
-            // action
             viewModel.onTapClose()
         } label: {
             Image(systemName: "xmark")

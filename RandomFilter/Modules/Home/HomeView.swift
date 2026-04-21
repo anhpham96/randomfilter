@@ -10,7 +10,8 @@ import SwiftUI
 struct HomeView: View {
         
     @StateObject var viewModel: HomeViewModel = HomeViewModel()
-        
+    @EnvironmentObject var navigationState: NavigationState
+    
     var body: some View {
         ZStack {
             content
@@ -19,6 +20,7 @@ struct HomeView: View {
                 PermissionDeniedView()
             }
         }
+        .onReceive(viewModel.event, perform: handleEvent)
         .onAppear {
             Task {
                 await viewModel.prepareCamera()
@@ -39,6 +41,16 @@ struct HomeView: View {
     
 }
 
+extension HomeView {
+    private func handleEvent(_ event: HomeEvent) {
+        switch event {
+        case .showResult(let url):
+            navigationState.routes.append(DashboardRoute.result(url: url))
+        }
+    }
+}
+
 #Preview {
     DashboardView()
+        .environmentObject(NavigationState())
 }

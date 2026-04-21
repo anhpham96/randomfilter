@@ -11,7 +11,7 @@ import AVFoundation
 import CoreImage
 import Combine
 
-final class HomeViewModel: NSObject, ObservableObject {
+final class HomeViewModel: BaseViewModel {
     
     // MARK: - State
     
@@ -22,14 +22,14 @@ final class HomeViewModel: NSObject, ObservableObject {
     @Published var isTorchOn = false
     @Published var currentPosition: AVCaptureDevice.Position = .back
     
-    @Published var recordedURL: URL?
-    @Published var showPreview = false
     @Published var permissionState: PermissionState = .idle
     
     @Published var isPaywallViewPresented: Bool = false
     
     let durationValues: [Double] = [15, 30, 60, 120]
     
+    let event = PassthroughSubject<HomeEvent, Never>()
+
     var progress: CGFloat {
         min(currentDuration / Double(selectedDuration), 1.0)
     }
@@ -60,7 +60,8 @@ final class HomeViewModel: NSObject, ObservableObject {
         
         self.videoProcessor = VideoFrameProcessor(selectedDuration: 15,
             recorder: recorder,
-            ciContext: ciContext
+            ciContext: ciContext,
+            isFrontCamera: sessionManager.isFrontCamera
         )
         self.audioProcessor = AudioFrameProcessor(recorder: recorder)
         
@@ -72,6 +73,11 @@ final class HomeViewModel: NSObject, ObservableObject {
             recordQueue: recordQueue,
             delegate: self
         )
+        
+        sessionManager.$cameraPosition
+            .sink { [weak self] position in
+                self?.videoProcessor.isFrontCamera = position == .front
+            }.store(in: &bag)
     }
     
     private func bindProcessor() {
@@ -118,8 +124,7 @@ final class HomeViewModel: NSObject, ObservableObject {
                 self.isRecording = false
                 
                 if let url {
-                    self.recordedURL = url
-                    self.showPreview = true
+                    self.event.send(.showResult(url: url))
                 }
             }
         }
@@ -132,7 +137,7 @@ final class HomeViewModel: NSObject, ObservableObject {
     }
     
     func switchCamera() {
-        
+        sessionManager.switchCamera()
     }
     
     func prepareCamera() async {
