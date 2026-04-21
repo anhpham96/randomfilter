@@ -26,6 +26,9 @@ final class HomeViewModel: BaseViewModel {
     
     @Published var isPaywallViewPresented: Bool = false
     
+    @Published var zoomFactor: CGFloat = 1.0
+
+    
     let durationValues: [Double] = [15, 30, 60, 120]
     
     let event = PassthroughSubject<HomeEvent, Never>()
@@ -138,6 +141,14 @@ final class HomeViewModel: BaseViewModel {
     
     func switchCamera() {
         sessionManager.switchCamera()
+    }
+    
+    func zoom(factor: CGFloat) async {
+        let zoomFactor = await sessionManager.zoom(factor: factor)
+        
+        await MainActor.run {
+            self.zoomFactor = zoomFactor
+        }
     }
     
     func prepareCamera() async {

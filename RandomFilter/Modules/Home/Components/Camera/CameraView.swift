@@ -11,7 +11,7 @@ struct CameraView: View {
     @ObservedObject var viewModel: HomeViewModel
        
     var body: some View {
-        CameraPreview(session: viewModel.sessionManager.session)
+        CameraPreview(session: viewModel.sessionManager.session, viewModel: viewModel)
             .ignoresSafeArea()
             .onAppear {
                 viewModel.start()

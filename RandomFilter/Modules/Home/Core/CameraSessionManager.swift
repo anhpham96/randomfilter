@@ -20,6 +20,9 @@ final class CameraSessionManager: NSObject {
     let videoOutput = AVCaptureVideoDataOutput()
     let audioOutput = AVCaptureAudioDataOutput()
     
+    private let minZoomFactor: CGFloat = 1.0
+    private let maxZoomFactor: CGFloat = 5.0
+    
     var isFrontCamera: Bool {
         currentInput?.device.position == .front
     }
@@ -28,11 +31,11 @@ final class CameraSessionManager: NSObject {
     
     func configure(recordQueue: DispatchQueue,
                    delegate: AVCaptureVideoDataOutputSampleBufferDelegate &
-                              AVCaptureAudioDataOutputSampleBufferDelegate) {
+                   AVCaptureAudioDataOutputSampleBufferDelegate) {
         
         sessionQueue.async { [weak self] in
             guard let self else { return }
-
+            
             self.session.beginConfiguration()
             self.session.sessionPreset = .high
             
@@ -65,7 +68,7 @@ final class CameraSessionManager: NSObject {
     
     private func setupOutputs(queue: DispatchQueue,
                               delegate: AVCaptureVideoDataOutputSampleBufferDelegate &
-                                         AVCaptureAudioDataOutputSampleBufferDelegate) {
+                              AVCaptureAudioDataOutputSampleBufferDelegate) {
         
         videoOutput.videoSettings = [
             kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
@@ -83,7 +86,7 @@ final class CameraSessionManager: NSObject {
     func start() {
         sessionQueue.async { [weak self] in
             guard let self else { return }
-
+            
             if !self.session.isRunning {
                 self.session.startRunning()
             }
@@ -93,7 +96,7 @@ final class CameraSessionManager: NSObject {
     func stop() {
         sessionQueue.async { [weak self] in
             guard let self else { return }
-
+            
             if self.session.isRunning {
                 self.session.stopRunning()
             }
@@ -104,11 +107,11 @@ final class CameraSessionManager: NSObject {
         
         sessionQueue.async { [weak self] in
             guard let self else { return }
-
+            
             guard let currentInput = self.currentInput else { return }
             
             let newPosition: AVCaptureDevice.Position =
-                currentInput.device.position == .back ? .front : .back
+            currentInput.device.position == .back ? .front : .back
             
             guard let newDevice = AVCaptureDevice.default(.builtInWideAngleCamera,
                                                           for: .video,
@@ -175,6 +178,39 @@ final class CameraSessionManager: NSObject {
         }
     }
     
+
+    func zoom(factor: CGFloat) async -> CGFloat {
+        await withCheckedContinuation { continuation in
+            sessionQueue.async { [weak self] in
+                guard let self = self,
+                      let device = self.currentInput?.device else {
+                    continuation.resume(returning: factor)
+                    return
+                }
+
+                do {
+                    try device.lockForConfiguration()
+
+                    let maxDeviceZoom = device.activeFormat.videoMaxZoomFactor
+                    let maxZoom = min(self.maxZoomFactor, maxDeviceZoom)
+
+                    let clampedZoom = max(self.minZoomFactor,
+                                          min(factor, maxZoom))
+
+                    device.videoZoomFactor = clampedZoom
+
+                    device.unlockForConfiguration()
+
+                    continuation.resume(returning: clampedZoom)
+
+                } catch {
+                    print("Zoom error: \(error.localizedDescription)")
+                    continuation.resume(returning: factor)
+                }
+            }
+        }
+    }
+    
     private func configureVideoConnection(position: AVCaptureDevice.Position) {
         guard let connection = videoOutput.connection(with: .video) else { return }
         
@@ -185,4 +221,8 @@ final class CameraSessionManager: NSObject {
         
         // Mirror for front camera
         connection.isVideoMirrored = (position == .front)
-    }}
+    }
+    
+    
+    
+}

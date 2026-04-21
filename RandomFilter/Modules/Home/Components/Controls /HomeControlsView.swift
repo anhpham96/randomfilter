@@ -49,12 +49,6 @@ struct HomeControlsView: View {
                     viewModel.startRecord()
                 }
                 
-//                HStack {
-//                    Text("Filter")
-//                    Spacer()
-//
-//                }
-//                .padding(.horizontal, 25)
             }
         }
     }
