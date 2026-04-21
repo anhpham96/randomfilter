@@ -11,21 +11,33 @@ struct HomeControlsView: View {
     
     @ObservedObject var viewModel: HomeViewModel
     @EnvironmentObject var purchaseManager: PurchaseManager
-    
+    @StateObject var adManager = NativeAdManager()
+
     var body: some View {
+       content
+            .onAppear {
+                loadAd()
+            }
+    }
+    
+    
+    var content: some View {
         VStack {
             VStack {
-                premiumButton
-                flashButton
-                if !viewModel.isRecording {
-                    switchCameraButton
+                adsView
+                VStack {
+                    premiumButton
+                    flashButton
+                    if !viewModel.isRecording {
+                        switchCameraButton
+                    }
                 }
-                
+                .trailingAlignment()
             }
-            .trailingAlignment()
             .padding(.horizontal, 20)
-            Spacer()
             
+            Spacer()
+
             if !viewModel.isRecording {
                 durationStack
             }
@@ -40,7 +52,7 @@ struct HomeControlsView: View {
 //                HStack {
 //                    Text("Filter")
 //                    Spacer()
-//                    
+//
 //                }
 //                .padding(.horizontal, 25)
             }
@@ -49,10 +61,18 @@ struct HomeControlsView: View {
     
     
     
-    
 }
 
 private extension HomeControlsView {
+    
+    @ViewBuilder
+    var adsView: some View {
+        if !purchaseManager.isPremium, let ad = adManager.adViewModel {
+            NativeAdContainer(nativeAd: ad.nativeAd)
+                .frame(height: 100)
+        }
+    }
+    
     
     @ViewBuilder
     var premiumButton: some View {
@@ -98,6 +118,11 @@ private extension HomeControlsView {
 private extension HomeControlsView {
     func isDurationSelected(_ value: Double) -> Bool {
         return viewModel.selectedDuration == value
+    }
+    
+    func loadAd() {
+        guard !purchaseManager.isPremium else { return }
+        adManager.load()
     }
 }
 
