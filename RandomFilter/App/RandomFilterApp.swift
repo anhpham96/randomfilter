@@ -12,6 +12,7 @@ import GoogleMobileAds
 struct RandomFilterApp: App {
     
     @StateObject private var purchaseManager = PurchaseManager()
+    @StateObject private var nativeAdManager: NativeAdManager = NativeAdManager()
     @StateObject private var router: AppRouter
 
     init() {
@@ -26,6 +27,7 @@ struct RandomFilterApp: App {
             RootView()
                 .environmentObject(router)
                 .environmentObject(purchaseManager)
+                .environmentObject(nativeAdManager)
         }
     }
 }

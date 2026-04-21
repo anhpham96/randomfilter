@@ -11,7 +11,9 @@ struct ResultView: View {
     
     @StateObject var viewModel: ResultViewModel
     @EnvironmentObject var navigationState: NavigationState
-    
+    @EnvironmentObject var nativeAdManager: NativeAdManager
+    @EnvironmentObject var purchaseManager: PurchaseManager
+
     var body: some View {
         content
             .onReceive(viewModel.event, perform: handleEvent)
@@ -19,15 +21,22 @@ struct ResultView: View {
             .onDisappear {
                 viewModel.removeLocalFile()
             }
+            .onAppear {
+                loadAd()
+            }
     }
     
     var content: some View {
         VStack {
             videoPreview
+            
+            nativeAdsView
+            
             saveButton
             retryButton
             shareButton
         }
+        .verticalScroll()
         .padding(25)
         .alert(isPresented: $viewModel.showErrorAlert) {
             saveFailedAlert
@@ -36,7 +45,7 @@ struct ResultView: View {
     
     var videoPreview: some View {
         VideoPreviewView(url: viewModel.url)
-            .frame(width: 167, height: 263)
+            .frame(width: 167, height: 167 * 16 / 9)
             .cornerRadius(14)
         
     }
@@ -78,6 +87,18 @@ struct ResultView: View {
         .buttonStyle(.primaryPurple)
     }
     
+    
+    @ViewBuilder
+    var nativeAdsView: some View {
+        Group {
+            if let ad = nativeAdManager.adViewModel {
+                NativeAdContainer<LargeNativeAdView>(nativeAd: ad.nativeAd)
+            } else {
+                Spacer()
+            }
+        }.frame(height: 200)
+    }
+    
     private var saveFailedAlert: Alert {
         Alert(
             title: Text("Save Failed"),
@@ -103,6 +124,7 @@ struct ResultView: View {
         case .failed: return "arrow.clockwise"
         }
     }
+    
 }
 
 extension ResultView {
@@ -112,12 +134,18 @@ extension ResultView {
             navigationState.popToRoot()
         }
     }
+    
+    func loadAd() {
+        guard !purchaseManager.isPremium else { return }
+        nativeAdManager.load()
+    }
 }
 
 
 #Preview {
     NavigationStack {
         ResultView(viewModel: ResultViewModel(url: URL(string: "https://www.w3schools.com/html/mov_bbb.mp4")!))
-    }
+    }.environmentObject(PurchaseManager())
+    .environmentObject(NativeAdManager())
   
 }

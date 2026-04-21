@@ -10,7 +10,7 @@ import SwiftUI
 struct OnboardingView: View {
     
     @StateObject var viewModel = OnboardingViewModel()
-    @StateObject var adManager = NativeAdManager()
+    @EnvironmentObject var nativeAdManager: NativeAdManager
 
     @EnvironmentObject var appRouter: AppRouter
     
@@ -18,7 +18,7 @@ struct OnboardingView: View {
         content
             .onReceive(viewModel.event, perform: handleEvent)
             .onAppear {
-                adManager.load()
+                nativeAdManager.load()
             }
     }
     
@@ -44,8 +44,8 @@ struct OnboardingView: View {
     @ViewBuilder
     var nativeAdsView: some View {
         Group {
-            if let ad = adManager.adViewModel {
-                NativeAdContainer(nativeAd: ad.nativeAd)
+            if let ad = nativeAdManager.adViewModel {
+                NativeAdContainer<MediumNativeAdView>(nativeAd: ad.nativeAd)
             } else {
                 Spacer()
             }

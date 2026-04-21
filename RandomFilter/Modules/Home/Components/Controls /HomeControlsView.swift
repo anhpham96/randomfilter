@@ -11,7 +11,7 @@ struct HomeControlsView: View {
     
     @ObservedObject var viewModel: HomeViewModel
     @EnvironmentObject var purchaseManager: PurchaseManager
-    @StateObject var adManager = NativeAdManager()
+    @EnvironmentObject var nativeAdManager: NativeAdManager
 
     var body: some View {
        content
@@ -61,8 +61,8 @@ private extension HomeControlsView {
     
     @ViewBuilder
     var adsView: some View {
-        if !purchaseManager.isPremium, let ad = adManager.adViewModel {
-            NativeAdContainer(nativeAd: ad.nativeAd)
+        if !purchaseManager.isPremium, let ad = nativeAdManager.adViewModel {
+            NativeAdContainer<MediumNativeAdView>(nativeAd: ad.nativeAd)
                 .frame(height: 100)
         }
     }
@@ -116,14 +116,13 @@ private extension HomeControlsView {
     
     func loadAd() {
         guard !purchaseManager.isPremium else { return }
-        adManager.load()
+        nativeAdManager.load()
     }
 }
 
 #Preview {
     HomeControlsView(viewModel: HomeViewModel())
         .background(
-            
             Image(.onboardingScreenshotTwo)
                 .resizable()
                 .scaledToFill()
