@@ -16,6 +16,9 @@ struct ResultView: View {
         content
             .onReceive(viewModel.event, perform: handleEvent)
             .navigationBarTitle("Result", displayMode: .inline)
+            .onDisappear {
+                viewModel.removeLocalFile()
+            }
     }
     
     var content: some View {
@@ -23,6 +26,7 @@ struct ResultView: View {
             videoPreview
             saveButton
             retryButton
+            shareButton
         }
         .padding(25)
         .alert(isPresented: $viewModel.showErrorAlert) {
@@ -59,6 +63,16 @@ struct ResultView: View {
             HStack {
                 Image(systemName: "arrow.clockwise")
                 Text("Retry")
+            }
+        }
+        .buttonStyle(.primaryPurple)
+    }
+    
+    var shareButton: some View {
+        ShareLink(item: viewModel.url) {
+            HStack {
+                Image(systemName: "square.and.arrow.up")
+                Text("Share Video")
             }
         }
         .buttonStyle(.primaryPurple)
