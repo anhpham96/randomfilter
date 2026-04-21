@@ -10,13 +10,16 @@ import SwiftUI
 struct OnboardingView: View {
     
     @StateObject var viewModel = OnboardingViewModel()
-    
+    @StateObject var adManager = NativeAdManager()
+
     @EnvironmentObject var appRouter: AppRouter
     
     var body: some View {
         content
             .onReceive(viewModel.event, perform: handleEvent)
-
+            .onAppear {
+                adManager.load()
+            }
     }
     
     var content: some View {
@@ -26,15 +29,29 @@ struct OnboardingView: View {
                     OnboardingStepView(step: step)
                         .ignoresSafeArea()
                         .tag(step)
+                    
                     }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
             nextStack
-            Spacer()
+            nativeAdsView
             continueButton
         }
         .verticalScroll()
         .ignoresSafeArea(edges: .top)
+    }
+    
+    @ViewBuilder
+    var nativeAdsView: some View {
+        Group {
+            if let ad = adManager.adViewModel {
+                NativeAdContainer(nativeAd: ad.nativeAd)
+            } else {
+                Spacer()
+            }
+        }.frame(height: 180)
+
+       
     }
 }
 

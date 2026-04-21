@@ -27,14 +27,15 @@ private extension OnboardingStepView {
     var topStack: some View {
         ZStack(alignment: .center) {
             ZStack(alignment: .bottom) {
+                topStackBackgroundView
+                    .frame(height: 500)
                 OnboardingScreenShotView(step: step)
                 topStackBlurView
                 topStackBottomView
             }
-            .clipped()
             decoratorItemsLayerView
         }.background(
-            topStackBackgroundView
+            
         )
         
     }
@@ -77,6 +78,7 @@ private extension OnboardingStepView {
             .lineSpacing(7.2)
             .padding(.horizontal, 24)
             .lineLimit(2)
+            .frame(height: 100)
     }
 
     var topStackBackgroundView: some View {
