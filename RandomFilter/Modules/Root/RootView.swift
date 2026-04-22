@@ -1,0 +1,36 @@
+//
+//  RootView.swift
+//  RandomFilter
+//
+//  Created by Pham Nguyen Nhat Anh on 17/4/26.
+//
+
+import SwiftUI
+
+struct RootView: View {
+    
+    @EnvironmentObject var router: AppRouter
+    
+    let viewModelFactory: ViewModelFactoryType
+
+    
+    var body: some View {
+        switch router.route {
+        case .splash:
+            SplashView()
+        case .onboarding:
+            OnboardingView(viewModel: viewModelFactory.makeOnboarding())
+        case .dashboard:
+            DashboardView(viewModelFactory: viewModelFactory)
+        case .paywall:
+            PaywallView(
+                viewModel: viewModelFactory.makePaywall(),
+                onClose: {
+                    withAnimation {
+                        router.route = .dashboard
+                    }
+                }
+            )
+        }
+    }
+}

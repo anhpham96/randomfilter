@@ -1,0 +1,13 @@
+//
+//  dev.xcconfig
+//  RandomFilter
+//
+//  Created by Pham Nguyen Nhat Anh on 21/4/26.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
+
+ADMOB_APP_ID=ca-app-pub-3604346220870618~2958892364
+INTER_UNIT_ID=ca-app-pub-3940256099942544/4411468910
+NATIVE_UNIT_ID=ca-app-pub-3940256099942544/3986624511
