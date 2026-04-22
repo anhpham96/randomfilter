@@ -17,7 +17,7 @@ struct ResultView: View {
     var body: some View {
         content
             .onReceive(viewModel.event, perform: handleEvent)
-            .navigationBarTitle("Result", displayMode: .inline)
+            .navigationBarTitle(Str.title, displayMode: .inline)
             .onDisappear {
                 viewModel.removeLocalFile()
                 removeAd()
@@ -72,7 +72,7 @@ struct ResultView: View {
         } label: {
             HStack {
                 Image(systemName: "arrow.clockwise")
-                Text("Retry")
+                Text(Str.retry)
             }
         }
         .buttonStyle(.primaryPurple)
@@ -82,7 +82,7 @@ struct ResultView: View {
         ShareLink(item: viewModel.url) {
             HStack {
                 Image(systemName: "square.and.arrow.up")
-                Text("Share Video")
+                Text(Str.share)
             }
         }
         .buttonStyle(.primaryPurple)
@@ -106,18 +106,18 @@ struct ResultView: View {
     
     private var saveFailedAlert: Alert {
         Alert(
-            title: Text("Save Failed"),
+            title: Text(Str.saveFailedTitle),
             message: Text(viewModel.errorMessage),
-            dismissButton: .cancel(Text("OK"))
+            dismissButton: .cancel(Text(Str.ok))
         )
     }
     
     private var buttonTitle: String {
         switch viewModel.state {
-        case .idle: return "Save"
-        case .saving: return "Saving..."
-        case .saved: return "Saved"
-        case .failed: return "Retry"
+        case .idle: return Str.save
+        case .saving: return Str.saving
+        case .saved: return Str.saved
+        case .failed: return Str.save
         }
     }
 
@@ -149,6 +149,21 @@ extension ResultView {
     func removeAd() {
         guard !purchaseManager.isPremium else { return }
         nativeAdManager.removeAd()
+    }
+}
+
+private extension ResultView {
+    enum Str {
+        static let title = "Result"
+        
+        static let save = "Save"
+        static let saving = "Saving..."
+        static let saved = "Saved"
+        static let retry = "Retry"
+        static let share = "Share Video"
+        
+        static let saveFailedTitle = "Save Failed"
+        static let ok = "OK"
     }
 }
 

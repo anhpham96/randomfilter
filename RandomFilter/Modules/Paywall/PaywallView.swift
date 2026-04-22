@@ -81,9 +81,22 @@ extension PaywallView {
     }
     
     var titleView: some View {
-        Text("Random Filter Premium")
+        Text(Str.title)
             .font(.racingSansOne(28))
         
+    }
+}
+
+// MARK: - Constants
+
+private extension PaywallView {
+    enum Str {
+        static let title = "Random Filter Premium"
+        static let privacyPolicyText = "Privacy Policy"
+        static let termOfUseText = "Terms Of Use"
+        static let restore = "Restore"
+        static let continueText = "Continue"
+
     }
 }
 
@@ -112,20 +125,15 @@ extension PaywallView {
 private extension PaywallView {
     var supportActionsStack: some View {
         HStack {
-            Link("Privacy Policy", destination: URL(string: "https://yourapp.com/privacy")!)
+            Link(Str.privacyPolicyText, destination: URL(string: "https://yourapp.com/privacy")!)
                 .underline()
-
             Spacer()
-            
-            Button("Restore") {
+            Button(Str.restore) {
                 viewModel.onTapClose()
             }.bold()
-            
             Spacer()
-
-            Link("Terms Of Use", destination: URL(string: "https://yourapp.com/privacy")!)
+            Link(Str.termOfUseText, destination: URL(string: "https://yourapp.com/privacy")!)
                 .underline()
-
         }
         .foregroundColor(.black)
         .padding(.horizontal, 25)
@@ -134,7 +142,7 @@ private extension PaywallView {
 
 private extension PaywallView {
     var continueButton: some View {
-        Button("Continue") {
+        Button(Str.continueText) {
             viewModel.onTapContinue(purchaseManager: purchaseManager)
         }.buttonStyle(.paywall(isLoading: viewModel.isLoading))
         .padding(.horizontal, 20)
@@ -151,10 +159,9 @@ private extension PaywallView {
             onClose()
         
         case .purchaseFailed:
-            print("")
-
+            print("purchaseFailed")
         case .openRestore:
-            print("")
+            print("openRestore")
 
         }
     }

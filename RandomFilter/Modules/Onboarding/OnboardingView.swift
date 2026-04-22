@@ -65,7 +65,7 @@ private extension OnboardingView {
     }
     
     var continueButton: some View {
-        Button("Continue"){
+        Button(Str.continueText){
             viewModel.tapOnContinueButton()
         }
         .buttonStyle(.primaryBlack)
@@ -88,6 +88,15 @@ private extension OnboardingView {
     
    
 }
+
+
+private extension OnboardingView {
+    enum Str {
+        static let continueText = "Continue"
+
+    }
+}
+
 
 #Preview {
     OnboardingView()
