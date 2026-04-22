@@ -33,7 +33,8 @@ struct PaywallView: View {
                 packageStack
                 benefitsView
             }
-            .background(.white)
+            .padding(.bottom, 20)
+            .background(Color.backgroundLight)
             .topAlignment()
             .verticalScroll()
 
@@ -41,6 +42,7 @@ struct PaywallView: View {
             continueButton
             supportActionsStack
         }
+        .background(Color.backgroundLight)
         .ignoresSafeArea(edges: .top)
     }
     
@@ -144,7 +146,8 @@ private extension PaywallView {
     var continueButton: some View {
         Button(Str.continueText) {
             viewModel.onTapContinue(purchaseManager: purchaseManager)
-        }.buttonStyle(.paywall(isLoading: viewModel.isLoading))
+        }
+        .buttonStyle(.paywall(isLoading: viewModel.isLoading))
         .padding(.horizontal, 20)
         .padding(.vertical, 5)
 
@@ -175,4 +178,5 @@ private extension PaywallView {
         
     })
     .environmentObject(PurchaseManager())
+    .environmentObject(AppRouter(purchaseManager: PurchaseManager()))
 }
