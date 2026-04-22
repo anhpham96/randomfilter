@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		08585EB32F98BEFF00BAA9F5 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 08585EB22F98BEFF00BAA9F5 /* README.md */; };
 		0877AA242F97CDAA0048B336 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0877AA232F97CDAA0048B336 /* LaunchScreen.storyboard */; };
 		08B137D22F973AF600CF862B /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 08B137D12F973AF600CF862B /* GoogleMobileAds */; };
 /* End PBXBuildFile section */
@@ -32,6 +33,7 @@
 		08457A412F90CB1A0090B7AA /* RandomFilter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RandomFilter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		08457A4E2F90CB1C0090B7AA /* RandomFilterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RandomFilterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		08457A582F90CB1C0090B7AA /* RandomFilterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RandomFilterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		08585EB22F98BEFF00BAA9F5 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		0877AA232F97CDAA0048B336 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -95,6 +97,7 @@
 		08457A382F90CB1A0090B7AA = {
 			isa = PBXGroup;
 			children = (
+				08585EB22F98BEFF00BAA9F5 /* README.md */,
 				0877AA232F97CDAA0048B336 /* LaunchScreen.storyboard */,
 				08457A432F90CB1A0090B7AA /* RandomFilter */,
 				08457A512F90CB1C0090B7AA /* RandomFilterTests */,
@@ -237,6 +240,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				08585EB32F98BEFF00BAA9F5 /* README.md in Resources */,
 				0877AA242F97CDAA0048B336 /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
