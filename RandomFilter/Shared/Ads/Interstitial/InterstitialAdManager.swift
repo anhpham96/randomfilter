@@ -16,7 +16,7 @@ final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
     func load() async {
         do {
             interstitialAd = try await InterstitialAd.load(
-                with: "ca-app-pub-3940256099942544/4411468910",
+                with: EnvironmentApp.interUnitID,
                 request: Request()
             )
             interstitialAd?.fullScreenContentDelegate = self

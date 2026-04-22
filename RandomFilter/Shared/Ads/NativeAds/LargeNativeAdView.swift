@@ -103,7 +103,7 @@ final class LargeNativeAdView: NativeAdView {
 
     // MARK: - Bind (CRITICAL)
     private func bindAssets() {
-        self.mediaView = media   // ✅ FIX QUAN TRỌNG
+        self.mediaView = media  
 
         self.headlineView = headlineLabel
         self.bodyView = bodyLabel

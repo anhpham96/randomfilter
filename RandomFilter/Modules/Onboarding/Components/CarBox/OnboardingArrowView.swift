@@ -14,7 +14,7 @@ struct OnboardingArrowView: View {
         Image(.carSelectorArrow)
             .resizable()
             .frame(width: 33, height: 33)
-            .offset(y: moveUp ? -5 : 5) // lên xuống
+            .offset(y: moveUp ? -5 : 5)
             .animation(
                 .easeInOut(duration: 0.8)
                 .repeatForever(autoreverses: true),

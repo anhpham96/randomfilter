@@ -20,7 +20,6 @@ final class AppRouter: ObservableObject {
     }
     
     func getRouteAfterSplash() -> AppRoute {
-        isFirstTimeOpened = true
         if isFirstTimeOpened {
             return .onboarding
         } else {

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0877AA242F97CDAA0048B336 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0877AA232F97CDAA0048B336 /* Launch Screen.storyboard */; };
 		08B137D22F973AF600CF862B /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 08B137D12F973AF600CF862B /* GoogleMobileAds */; };
 /* End PBXBuildFile section */
 
@@ -31,6 +32,7 @@
 		08457A412F90CB1A0090B7AA /* RandomFilter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RandomFilter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		08457A4E2F90CB1C0090B7AA /* RandomFilterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RandomFilterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		08457A582F90CB1C0090B7AA /* RandomFilterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RandomFilterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0877AA232F97CDAA0048B336 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -93,6 +95,7 @@
 		08457A382F90CB1A0090B7AA = {
 			isa = PBXGroup;
 			children = (
+				0877AA232F97CDAA0048B336 /* Launch Screen.storyboard */,
 				08457A432F90CB1A0090B7AA /* RandomFilter */,
 				08457A512F90CB1C0090B7AA /* RandomFilterTests */,
 				08457A5B2F90CB1C0090B7AA /* RandomFilterUITests */,
@@ -234,6 +237,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0877AA242F97CDAA0048B336 /* Launch Screen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -293,6 +297,8 @@
 /* Begin XCBuildConfiguration section */
 		08457A602F90CB1C0090B7AA /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 08457A432F90CB1A0090B7AA /* RandomFilter */;
+			baseConfigurationReferenceRelativePath = App/Config/dev.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -357,6 +363,8 @@
 		};
 		08457A612F90CB1C0090B7AA /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 08457A432F90CB1A0090B7AA /* RandomFilter */;
+			baseConfigurationReferenceRelativePath = App/Config/production.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -414,8 +422,10 @@
 		};
 		08457A632F90CB1C0090B7AA /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 08457A432F90CB1A0090B7AA /* RandomFilter */;
+			baseConfigurationReferenceRelativePath = App/Config/dev.xcconfig;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-dev";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -423,6 +433,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RandomFilter/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Random Filter";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -448,6 +460,8 @@
 		};
 		08457A642F90CB1C0090B7AA /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 08457A432F90CB1A0090B7AA /* RandomFilter */;
+			baseConfigurationReferenceRelativePath = App/Config/production.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -457,6 +471,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = RandomFilter/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Random Filter";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -482,6 +498,8 @@
 		};
 		08457A662F90CB1C0090B7AA /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 08457A432F90CB1A0090B7AA /* RandomFilter */;
+			baseConfigurationReferenceRelativePath = App/Config/dev.xcconfig;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -504,6 +522,8 @@
 		};
 		08457A672F90CB1C0090B7AA /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 08457A432F90CB1A0090B7AA /* RandomFilter */;
+			baseConfigurationReferenceRelativePath = App/Config/production.xcconfig;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -526,6 +546,8 @@
 		};
 		08457A692F90CB1C0090B7AA /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 08457A432F90CB1A0090B7AA /* RandomFilter */;
+			baseConfigurationReferenceRelativePath = App/Config/dev.xcconfig;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -546,6 +568,8 @@
 		};
 		08457A6A2F90CB1C0090B7AA /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 08457A432F90CB1A0090B7AA /* RandomFilter */;
+			baseConfigurationReferenceRelativePath = App/Config/production.xcconfig;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;

@@ -20,6 +20,7 @@ struct ResultView: View {
             .navigationBarTitle("Result", displayMode: .inline)
             .onDisappear {
                 viewModel.removeLocalFile()
+                removeAd()
             }
             .onAppear {
                 loadAd()
@@ -36,8 +37,8 @@ struct ResultView: View {
             retryButton
             shareButton
         }
-        .verticalScroll()
         .padding(25)
+        .verticalScroll()
         .alert(isPresented: $viewModel.showErrorAlert) {
             saveFailedAlert
         }
@@ -90,13 +91,17 @@ struct ResultView: View {
     
     @ViewBuilder
     var nativeAdsView: some View {
-        Group {
-            if let ad = nativeAdManager.adViewModel {
-                NativeAdContainer<LargeNativeAdView>(nativeAd: ad.nativeAd)
-            } else {
-                Spacer()
+        if purchaseManager.isPremium {
+            EmptyView()
+        } else {
+            Group {
+                if let ad = nativeAdManager.adViewModel {
+                    NativeAdContainer<LargeNativeAdView>(nativeAd: ad.nativeAd)
+                } else {
+                    Spacer()
+                }
             }
-        }.frame(height: 200)
+        }
     }
     
     private var saveFailedAlert: Alert {
@@ -132,12 +137,18 @@ extension ResultView {
         switch event {
         case .back:
             navigationState.popToRoot()
+            
         }
     }
     
     func loadAd() {
         guard !purchaseManager.isPremium else { return }
         nativeAdManager.load()
+    }
+    
+    func removeAd() {
+        guard !purchaseManager.isPremium else { return }
+        nativeAdManager.removeAd()
     }
 }
 

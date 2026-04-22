@@ -17,7 +17,7 @@ final class NativeAdManager: NSObject, ObservableObject {
     
     func load() {
         adLoader = AdLoader(
-            adUnitID: "ca-app-pub-3940256099942544/3986624511",
+            adUnitID: EnvironmentApp.nativeUnitID,
             rootViewController: nil,
             adTypes: [.native],
             options: nil
@@ -25,6 +25,10 @@ final class NativeAdManager: NSObject, ObservableObject {
         
         adLoader?.delegate = self
         adLoader?.load(Request())
+    }
+    
+    func removeAd() {
+        self.adViewModel = nil
     }
 }
 

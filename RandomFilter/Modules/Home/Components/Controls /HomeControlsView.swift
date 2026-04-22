@@ -18,6 +18,10 @@ struct HomeControlsView: View {
             .onAppear {
                 loadAd()
             }
+            .onDisappear {
+                removeAd()
+            }
+
     }
     
     
@@ -117,6 +121,11 @@ private extension HomeControlsView {
     func loadAd() {
         guard !purchaseManager.isPremium else { return }
         nativeAdManager.load()
+    }
+    
+    func removeAd() {
+        guard !purchaseManager.isPremium else { return }
+        nativeAdManager.removeAd()
     }
 }
 

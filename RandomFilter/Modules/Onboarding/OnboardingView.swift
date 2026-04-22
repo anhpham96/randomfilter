@@ -50,7 +50,8 @@ struct OnboardingView: View {
                 Spacer()
             }
         }.frame(height: 180)
-
+        .padding(.horizontal, 20)
+        .padding(.vertical, 5)
        
     }
 }
@@ -79,6 +80,7 @@ private extension OnboardingView {
         switch event {
         case .navigateToPaywall:
             withAnimation {
+                nativeAdManager.removeAd()
                 appRouter.finishOnboarding()
             }
         }
