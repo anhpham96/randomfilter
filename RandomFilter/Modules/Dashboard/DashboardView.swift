@@ -11,13 +11,15 @@ struct DashboardView: View {
     
     @StateObject var navigationState = NavigationState()
     
+    let viewModelFactory: ViewModelFactoryType
+    
     var body: some View {
         NavigationStack(path: $navigationState.routes) {
-            HomeView()
+            HomeView(viewModel: viewModelFactory.makeHome())
                 .navigationDestination(for: DashboardRoute.self) { route in
                     switch route {
                     case .result(let url):
-                        ResultView(viewModel: ResultViewModel(url: url))
+                        ResultView(viewModel: viewModelFactory.makeResult(url: url))
                     }
                 }
         }.environmentObject(navigationState)
@@ -25,5 +27,5 @@ struct DashboardView: View {
 }
 
 #Preview {
-    DashboardView()
+    DashboardView(viewModelFactory: ViewModelFactory())
 }

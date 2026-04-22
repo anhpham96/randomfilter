@@ -11,20 +11,26 @@ struct RootView: View {
     
     @EnvironmentObject var router: AppRouter
     
+    let viewModelFactory: ViewModelFactoryType
+
+    
     var body: some View {
         switch router.route {
         case .splash:
             SplashView()
         case .onboarding:
-            OnboardingView()
+            OnboardingView(viewModel: viewModelFactory.makeOnboarding())
         case .dashboard:
-            DashboardView()
+            DashboardView(viewModelFactory: viewModelFactory)
         case .paywall:
-            PaywallView(onClose: {
-                withAnimation {
-                    router.route = .dashboard
+            PaywallView(
+                viewModel: viewModelFactory.makePaywall(),
+                onClose: {
+                    withAnimation {
+                        router.route = .dashboard
+                    }
                 }
-            })
+            )
         }
     }
 }

@@ -33,6 +33,16 @@ open RandomFilter.xcodeproj
 
 **If using a real device, make sure it’s connected and trusted**
 
+## 🏗 Architecture
+
+- **Selected architecture:** MVVM (Model – View – ViewModel)
+
+### 🤔 Why I use MVVM Architecture
+- Separates UI and business logic clearly
+- Reduces coupling between View and logic
+- Makes code easier to maintain and scale
+- Improves testability (especially ViewModel)
+- Fits well with SwiftUI data binding
 
 ## 🚀 Features
 

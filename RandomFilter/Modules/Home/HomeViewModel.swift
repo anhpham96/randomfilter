@@ -158,7 +158,10 @@ final class HomeViewModel: BaseViewModel {
     
     func toggleTorch() {
         sessionManager.toggleTorch { isTorchOn  in
-            self.isTorchOn = isTorchOn
+            DispatchQueue.main.async {
+                
+                self.isTorchOn = isTorchOn
+            }
         }
     }
     

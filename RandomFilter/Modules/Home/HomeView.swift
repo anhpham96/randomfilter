@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
         
-    @StateObject var viewModel: HomeViewModel = HomeViewModel()
+    @StateObject var viewModel: HomeViewModel
     @EnvironmentObject var navigationState: NavigationState
     
     var body: some View {
@@ -27,7 +27,7 @@ struct HomeView: View {
             }
         }
         .fullScreenCover(isPresented: $viewModel.isPaywallViewPresented) {
-            PaywallView {
+            PaywallView(viewModel: PaywallViewModel()) {
                 viewModel.isPaywallViewPresented = false
             }
         }
@@ -51,6 +51,6 @@ extension HomeView {
 }
 
 #Preview {
-    DashboardView()
+    DashboardView(viewModelFactory: ViewModelFactory())
         .environmentObject(NavigationState())
 }

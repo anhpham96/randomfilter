@@ -10,7 +10,7 @@ import SwiftUI
 
 struct PaywallView: View {
 
-    @StateObject var viewModel: PaywallViewModel = PaywallViewModel()
+    @StateObject var viewModel: PaywallViewModel
     
     @EnvironmentObject var appRouter: AppRouter
     @EnvironmentObject var purchaseManager: PurchaseManager
@@ -174,7 +174,7 @@ private extension PaywallView {
 
 
 #Preview {
-    PaywallView(onClose: {
+    PaywallView(viewModel: PaywallViewModel(), onClose: {
         
     })
     .environmentObject(PurchaseManager())

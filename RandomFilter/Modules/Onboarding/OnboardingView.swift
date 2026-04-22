@@ -9,7 +9,7 @@ import SwiftUI
 
 struct OnboardingView: View {
     
-    @StateObject var viewModel = OnboardingViewModel()
+    @StateObject var viewModel: OnboardingViewModel
     @EnvironmentObject var nativeAdManager: NativeAdManager
 
     @EnvironmentObject var appRouter: AppRouter
@@ -99,5 +99,5 @@ private extension OnboardingView {
 
 
 #Preview {
-    OnboardingView()
+    OnboardingView(viewModel: OnboardingViewModel())
 }
