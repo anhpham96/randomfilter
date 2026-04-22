@@ -33,9 +33,8 @@ final class HomeViewModel: BaseViewModel {
 
     private var countdownTask: Task<Void, Never>?
 
-    var hasTorch: Bool {
-        sessionManager.hasTorch
-    }
+    @Published var hasTorch: Bool = false
+
     
     let durationValues: [Double] = [15, 30, 60, 120]
     
@@ -84,6 +83,11 @@ final class HomeViewModel: BaseViewModel {
         sessionManager.$cameraPosition
             .sink { [weak self] position in
                 self?.videoProcessor.isFrontCamera = position == .front
+            }.store(in: &bag)
+        
+        sessionManager.$currentInput
+            .sink { [weak self] currentInput in
+                self?.hasTorch = currentInput?.device.hasTorch ?? false
             }.store(in: &bag)
     }
     

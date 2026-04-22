@@ -16,7 +16,7 @@ final class CameraSessionManager: NSObject {
     private let sessionQueue = DispatchQueue(label: QueueLabel.cameraSession.rawValue)
     private let captureOutputQueue = DispatchQueue(label: QueueLabel.captureOutput.rawValue)
 
-    private(set) var currentInput: AVCaptureDeviceInput?
+    @Published private(set) var currentInput: AVCaptureDeviceInput?
     
     let videoOutput = AVCaptureVideoDataOutput()
     let audioOutput = AVCaptureAudioDataOutput()
