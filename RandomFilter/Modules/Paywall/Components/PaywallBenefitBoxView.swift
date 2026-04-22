@@ -22,7 +22,7 @@ struct PaywallBenefitBoxView: View {
     }
     
     var titleView: some View {
-        Text("Premium Benefits")
+        Text(Str.title)
             .font(.racingSansOne(20))
     }
     
@@ -31,9 +31,8 @@ struct PaywallBenefitBoxView: View {
 
             // Header
             Text("")
-            Text("Free")
+            Text(Str.freeText)
                 .font(.quickSandBold(14))
-
             Image(.paywallPremiumBadge)
 
             // Rows
@@ -55,6 +54,14 @@ struct PaywallBenefitBoxView: View {
     }
     
     
+}
+
+private extension PaywallBenefitBoxView {
+    enum Str {
+        static let title = "Premium Benefits"
+        static let freeText = "Free"
+
+    }
 }
 
 #Preview {

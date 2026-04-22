@@ -23,7 +23,15 @@ struct OnboardingScreenShotView: View {
                     .frame(width: 228, height: 480)
                     .clipShape(RoundedRectangle(cornerRadius: 42))
             }
-            .offset(y: 60)
+            .mask(
+                VStack(content: {
+                    Rectangle()
+                        .frame(height: 400, alignment: .bottom)
+                    Spacer()
+                })
+            )
+            .frame(width: 228, height: 400, alignment: .top)
+        
     }
 }
 

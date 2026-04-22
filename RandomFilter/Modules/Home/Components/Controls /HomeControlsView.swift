@@ -11,48 +11,78 @@ struct HomeControlsView: View {
     
     @ObservedObject var viewModel: HomeViewModel
     @EnvironmentObject var purchaseManager: PurchaseManager
-    
+    @EnvironmentObject var nativeAdManager: NativeAdManager
+
     var body: some View {
+       content
+            .opacity(viewModel.isCountingDown ? 0 : 1)
+            .overlay(content: {
+                if viewModel.isCountingDown {
+                    CountdownTextView(seconds: viewModel.countdownSeconds)
+                }
+               
+            })
+            .onAppear {
+                loadAd()
+            }
+            .onDisappear {
+                removeAd()
+            }
+
+    }
+    
+    
+    var content: some View {
         VStack {
             VStack {
-                premiumButton
-                flashButton
-                if !viewModel.isRecording {
-                    switchCameraButton
+                adsView
+                VStack {
+                    premiumButton
+                    
+                    if viewModel.hasTorch {
+                        flashButton
+                    }
+                    
+                    if !viewModel.isRecording {
+                        switchCameraButton
+                        countdownButton
+                    }
+                                    
+                        
                 }
-                
+                .trailingAlignment()
             }
-            .trailingAlignment()
             .padding(.horizontal, 20)
-            Spacer()
             
+            Spacer()
+
             if !viewModel.isRecording {
                 durationStack
             }
             
             ZStack {
                 RecordButton(isRecording: viewModel.isRecording, progress: viewModel.progress) {
-                    viewModel.isRecording ?
-                    viewModel.stopRecord() :
-                    viewModel.startRecord()
+                    viewModel.tapOnRecordingButton()
                 }
                 
-//                HStack {
-//                    Text("Filter")
-//                    Spacer()
-//                    
-//                }
-//                .padding(.horizontal, 25)
             }
         }
     }
     
     
     
-    
 }
 
 private extension HomeControlsView {
+    
+    @ViewBuilder
+    var adsView: some View {
+        if !purchaseManager.isPremium, let ad = nativeAdManager.adViewModel {
+            NativeAdContainer<MediumNativeAdView>(nativeAd: ad.nativeAd)
+                .frame(height: 100)
+        }
+    }
+    
     
     @ViewBuilder
     var premiumButton: some View {
@@ -72,6 +102,25 @@ private extension HomeControlsView {
         CameraControlButton(systemName: systemName, action: {
             viewModel.toggleTorch()
         })
+    }
+    
+    var countdownButton: some View {
+        CameraControlButton(
+            systemName: "timer",
+            action: {
+                viewModel.isCountdownOn.toggle()
+            }
+        )
+        .overlay(alignment: .bottomTrailing) {
+            if viewModel.isCountdownOn {
+                Text("\(viewModel.limitTimer)")
+                    .foregroundColor(.white)
+                    .font(.quickSand(12))
+                    .bold()
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+            }
+        }
     }
     
     var switchCameraButton: some View {
@@ -99,12 +148,21 @@ private extension HomeControlsView {
     func isDurationSelected(_ value: Double) -> Bool {
         return viewModel.selectedDuration == value
     }
+    
+    func loadAd() {
+        guard !purchaseManager.isPremium else { return }
+        nativeAdManager.load()
+    }
+    
+    func removeAd() {
+        guard !purchaseManager.isPremium else { return }
+        nativeAdManager.removeAd()
+    }
 }
 
 #Preview {
     HomeControlsView(viewModel: HomeViewModel())
         .background(
-            
             Image(.onboardingScreenshotTwo)
                 .resizable()
                 .scaledToFill()

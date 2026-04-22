@@ -27,14 +27,15 @@ private extension OnboardingStepView {
     var topStack: some View {
         ZStack(alignment: .center) {
             ZStack(alignment: .bottom) {
+                topStackBackgroundView
+                    .frame(height: 500)
                 OnboardingScreenShotView(step: step)
                 topStackBlurView
                 topStackBottomView
             }
-            .clipped()
             decoratorItemsLayerView
         }.background(
-            topStackBackgroundView
+            
         )
         
     }
@@ -43,27 +44,8 @@ private extension OnboardingStepView {
         
         ZStack(alignment: .center) {
             ForEach(step.decoratorItems, id: \.id) { item in
-                switch item.type {
-                case .image(let image, let size):
-                    Image(image)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: size, height: size)
-                        .whiteGlow()
-                        .offset(x: item.offset.x, y: item.offset.y)
-                case .text(let text):
-                    Text(text)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
-                        .font(.racingSansOne(24))
-                        .bold()
-                        .foregroundColor(.backgroundPrimary)
-                        .whiteGlow()
-                        .shadow(color: .white, radius: 10)
-                        .rotationEffect(item.rotation)
-                        .offset(x: item.offset.x, y: item.offset.y)
-                    }
-                }
+                OnboardingDecoratorItemView(item: item)
+            }
         }
        
         
@@ -77,6 +59,7 @@ private extension OnboardingStepView {
             .lineSpacing(7.2)
             .padding(.horizontal, 24)
             .lineLimit(2)
+            .frame(height: 100)
     }
 
     var topStackBackgroundView: some View {

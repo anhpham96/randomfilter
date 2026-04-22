@@ -11,12 +11,17 @@ struct SplashView: View {
 
     @StateObject var viewModel: SplashViewModel = SplashViewModel()
     @EnvironmentObject var router: AppRouter
-    
-    
+    @EnvironmentObject var purchaseManager: PurchaseManager
+    private let interstitialAdsManager = InterstitialAdManager()
+
     var body: some View {
         mainView
         .onReceive(viewModel.event, perform: handleEvent)
         .onAppear {
+            
+        }
+        .task {
+            await interstitialAdsManager.load()
             viewModel.start()
         }
     }
@@ -112,9 +117,15 @@ private extension SplashView {
     private func handleEvent(_ event: SplashEvent) {
         switch event {
         case .didFinish:
-            withAnimation {
-                router.route = router.getRouteAfterSplash()
+            let navigate = {
+                withAnimation {
+                    router.route = router.getRouteAfterSplash()
+                }
             }
+                
+            purchaseManager.isPremium
+            ? navigate()
+            : interstitialAdsManager.showAd(onDismiss: navigate)
         }
     }
     

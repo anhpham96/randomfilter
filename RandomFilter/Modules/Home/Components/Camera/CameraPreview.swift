@@ -12,7 +12,8 @@ import AVFoundation
 struct CameraPreview: UIViewRepresentable {
     
     let session: AVCaptureSession
-    
+    let viewModel: HomeViewModel
+
     func makeUIView(context: Context) -> UIView {
         let view = UIView()
         
@@ -21,6 +22,17 @@ struct CameraPreview: UIViewRepresentable {
         previewLayer.frame = UIScreen.main.bounds
         
         view.layer.addSublayer(previewLayer)
+        
+        // Add pinch gesture for zoom
+        let pinchGesture = UIPinchGestureRecognizer(
+            target: context.coordinator,
+            action: #selector(Coordinator.handlePinch(_:))
+        )
+        view.addGestureRecognizer(pinchGesture)
+        
+        context.coordinator.viewModel = viewModel
+
+        
         return view
     }
     
@@ -39,23 +51,25 @@ struct CameraPreview: UIViewRepresentable {
     
     class Coordinator {
         var previewLayer: AVCaptureVideoPreviewLayer?
-        var cameraManager: HomeViewModel?
+        var viewModel: HomeViewModel?
         var lastZoomFactor: CGFloat = 1.0
         
-//        @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
-//            guard let manager = cameraManager else { return }
-//            
-//            switch gesture.state {
-//            case .began:
-//                //lastZoomFactor = manager.zoomFactor
-//                
-//            case .changed:
-//                let newZoom = lastZoomFactor * gesture.scale
-//                manager.zoom(factor: newZoom)
-//                
-//            default:
-//                break
-//            }
-//        }
+        @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
+            guard let viewModel = viewModel else { return }
+            
+            switch gesture.state {
+            case .began:
+                lastZoomFactor = viewModel.zoomFactor
+                
+            case .changed:
+                let newZoom = lastZoomFactor * gesture.scale
+                Task {
+                    await viewModel.zoom(factor: newZoom)
+                }
+                
+            default:
+                break
+            }
+        }
     }
 }

@@ -21,6 +21,7 @@ struct OnboardingNextView: View {
 }
 
 private extension OnboardingNextView {
+    
 
     var onboardingStepStatusView: some View {
         HStack(spacing: 6) {
@@ -49,7 +50,7 @@ private extension OnboardingNextView {
                 Button {
                     viewModel.tapOnNextButton()
                 } label: {
-                    Text("Next")
+                    Text(Str.nextText)
                         .bold()
                         .foregroundColor(Color.backgroundPrimary)
                 }
@@ -59,6 +60,15 @@ private extension OnboardingNextView {
         }
     }
 }
+
+
+private extension OnboardingNextView {
+    enum Str {
+        static let nextText = "Next"
+
+    }
+}
+
 
 #Preview {
     OnboardingNextView(viewModel: OnboardingViewModel())

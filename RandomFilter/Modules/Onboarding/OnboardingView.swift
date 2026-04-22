@@ -10,13 +10,16 @@ import SwiftUI
 struct OnboardingView: View {
     
     @StateObject var viewModel = OnboardingViewModel()
-    
+    @EnvironmentObject var nativeAdManager: NativeAdManager
+
     @EnvironmentObject var appRouter: AppRouter
     
     var body: some View {
         content
             .onReceive(viewModel.event, perform: handleEvent)
-
+            .onAppear {
+                nativeAdManager.load()
+            }
     }
     
     var content: some View {
@@ -26,15 +29,30 @@ struct OnboardingView: View {
                     OnboardingStepView(step: step)
                         .ignoresSafeArea()
                         .tag(step)
+                    
                     }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
             nextStack
-            Spacer()
+            nativeAdsView
             continueButton
         }
         .verticalScroll()
         .ignoresSafeArea(edges: .top)
+    }
+    
+    @ViewBuilder
+    var nativeAdsView: some View {
+        Group {
+            if let ad = nativeAdManager.adViewModel {
+                NativeAdContainer<MediumNativeAdView>(nativeAd: ad.nativeAd)
+            } else {
+                Spacer()
+            }
+        }.frame(height: 180)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 5)
+       
     }
 }
 
@@ -47,7 +65,7 @@ private extension OnboardingView {
     }
     
     var continueButton: some View {
-        Button("Continue"){
+        Button(Str.continueText){
             viewModel.tapOnContinueButton()
         }
         .buttonStyle(.primaryBlack)
@@ -62,6 +80,7 @@ private extension OnboardingView {
         switch event {
         case .navigateToPaywall:
             withAnimation {
+                nativeAdManager.removeAd()
                 appRouter.finishOnboarding()
             }
         }
@@ -69,6 +88,15 @@ private extension OnboardingView {
     
    
 }
+
+
+private extension OnboardingView {
+    enum Str {
+        static let continueText = "Continue"
+
+    }
+}
+
 
 #Preview {
     OnboardingView()

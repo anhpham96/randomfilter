@@ -21,10 +21,20 @@ final class HomeViewModel: BaseViewModel {
     @Published var isRecording = false
     @Published var isTorchOn = false
     @Published var currentPosition: AVCaptureDevice.Position = .back
-    
     @Published var permissionState: PermissionState = .idle
-    
     @Published var isPaywallViewPresented: Bool = false
+    
+    @Published var zoomFactor: CGFloat = 1.0
+    
+    @Published var countdownSeconds: Int = 0
+    @Published var isCountdownOn: Bool = false
+    @Published var isCountingDown: Bool = false
+    var limitTimer: Int = 5
+
+    private var countdownTask: Task<Void, Never>?
+
+    @Published var hasTorch: Bool = false
+
     
     let durationValues: [Double] = [15, 30, 60, 120]
     
@@ -41,7 +51,6 @@ final class HomeViewModel: BaseViewModel {
     let permission = CameraPermissionService()
     
     private let ciContext = CIContext()
-    private let recordQueue = DispatchQueue(label: "camera.record.queue", qos: .userInitiated)
     
     private let videoProcessor: VideoFrameProcessor
     private let audioProcessor: AudioFrameProcessor
@@ -69,14 +78,16 @@ final class HomeViewModel: BaseViewModel {
         videoProcessor.previewContinuation = previewContinuation
         bindProcessor()
         
-        sessionManager.configure(
-            recordQueue: recordQueue,
-            delegate: self
-        )
+        sessionManager.configure(delegate: self)
         
         sessionManager.$cameraPosition
             .sink { [weak self] position in
                 self?.videoProcessor.isFrontCamera = position == .front
+            }.store(in: &bag)
+        
+        sessionManager.$currentInput
+            .sink { [weak self] currentInput in
+                self?.hasTorch = currentInput?.device.hasTorch ?? false
             }.store(in: &bag)
     }
     
@@ -93,8 +104,16 @@ final class HomeViewModel: BaseViewModel {
             self?.stopRecord()
         }
     }
+
     
     // MARK: - Control
+    
+    func tapOnRecordingButton() {
+        if isRecording { return stopRecord() }
+        if isCountingDown { return stopCountdown() }
+        if isCountdownOn { return startCountdown() }
+        return startRecord()
+    }
     
     func start() {
         sessionManager.start()
@@ -108,17 +127,21 @@ final class HomeViewModel: BaseViewModel {
     
     // MARK: - Record
     
-    func startRecord() {
+    private func startRecord() {
         recorder.prepare(config: .init(width: 1080, height: 1920))
         recorder.start()
         
         videoProcessor.reset()
         
         currentDuration = 0
-        isRecording = true
+        withAnimation(.linear(duration: 0.4)) {
+            isRecording = true
+
+        }
+        
     }
     
-    func stopRecord() {
+    private func stopRecord() {
         recorder.stop { url in
             DispatchQueue.main.async {
                 self.isRecording = false
@@ -138,6 +161,43 @@ final class HomeViewModel: BaseViewModel {
     
     func switchCamera() {
         sessionManager.switchCamera()
+    }
+    
+    func startCountdown() {
+        countdownTask?.cancel() // tránh chạy trùng
+        
+        countdownTask = Task {
+            countdownSeconds = limitTimer
+            isCountingDown = true
+            
+            while countdownSeconds > 0 {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                
+                if Task.isCancelled { return }
+                
+                countdownSeconds -= 1
+            }
+            
+            countdownSeconds = 0
+            isCountingDown = false
+            startRecord()
+        }
+    }
+
+    func stopCountdown() {
+        countdownTask?.cancel()
+        countdownTask = nil
+        
+        isCountingDown = false
+        countdownSeconds = 0
+    }
+    
+    func zoom(factor: CGFloat) async {
+        let zoomFactor = await sessionManager.zoom(factor: factor)
+        
+        await MainActor.run {
+            self.zoomFactor = zoomFactor
+        }
     }
     
     func prepareCamera() async {

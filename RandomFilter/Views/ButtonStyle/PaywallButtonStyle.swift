@@ -22,20 +22,12 @@ struct PaywallButtonStyle: ButtonStyle {
             .frame(maxWidth: .infinity)
             .foregroundColor(.white)
             .bold()
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(Color.orangeBackground)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.orangeBorder, lineWidth: 2)
-                    )
-                    .shadow(
-                        color: Color.orangeBorder.opacity(0.5),
-                        radius: configuration.isPressed ? 2 : 6,
-                        y: configuration.isPressed ? 2 : 6
-                    )
-            )
-            .scaleEffect(configuration.isPressed && !isLoading ? 0.97 : 1)
+            .shadowBorder(strokeColor: .orangeBorder,
+                          backgroundColor: .orangeBackground,
+                          shadowColor: Color.orangeBorder,
+                          shadowOffset: configuration.isPressed ? .zero : .init(width: 0, height: 4))
+            .offset(y: configuration.isPressed ? 4 : 0)
+
             .brightness(configuration.isPressed && !isLoading ? -0.05 : 0)
             .animation(.easeInOut(duration: 0.12), value: configuration.isPressed)
     }
@@ -46,3 +38,14 @@ extension ButtonStyle where Self == PaywallButtonStyle {
         .init(isLoading: isLoading)
     }
 }
+
+//
+//    .background(
+//        RoundedRectangle(cornerRadius: cornerRadius)
+//            .fill(backgroundColor)
+//            .shadow(color: shadowColor, radius: 0, x: shadowOffset.width, y: shadowOffset.height)
+//    )
+//    .overlay(
+//        RoundedRectangle(cornerRadius: cornerRadius)
+//            .stroke(strokeColor, lineWidth: lineWidth)
+//    )

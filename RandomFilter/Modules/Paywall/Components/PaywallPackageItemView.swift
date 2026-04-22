@@ -55,7 +55,7 @@ struct PaywallPackageItemView: View {
                 )
                 .shadowBorder(shadowOffset: CGSize(width: 0, height: 10))
                 .overlay {
-                    Text("Best Offer")
+                    Text(Str.bestOffer.value)
                         .font(.quickSand(12))
                         .bold()
                         .padding(.horizontal, 10)
@@ -102,6 +102,22 @@ struct PaywallPackageItemView: View {
     
     var priceTextSize: CGFloat {
         return item.isBestOffer ? 28 : 16
+    }
+}
+
+private extension PaywallPackageItemView {
+    enum Str {
+        case weeklyPriceTitle(priceTitle: String)
+        case bestOffer
+        
+        var value: String {
+            switch self {
+            case .weeklyPriceTitle(let price):
+                return "\(price)/week"
+            case .bestOffer:
+                return "Best Offer"
+            }
+        }
     }
 }
 

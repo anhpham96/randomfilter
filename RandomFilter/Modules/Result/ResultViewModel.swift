@@ -31,8 +31,6 @@ final class ResultViewModel: BaseViewModel {
         do {
             try await saveToPhotoLibrary(fileURL: url)
             state = .saved
-            
-            removeLocalFile(url)
         } catch {
             state = .failed
             errorMessage = error.localizedDescription
@@ -46,12 +44,7 @@ final class ResultViewModel: BaseViewModel {
         state = .idle
         showErrorAlert = false
         errorMessage = ""
-        
-        // optional: dọn file cũ nếu bạn muốn đảm bảo sạch
-        removeLocalFile(url)
-        
         event.send(.back)
-        
     }
     
     private func saveToPhotoLibrary(fileURL: URL) async throws {
@@ -67,7 +60,7 @@ final class ResultViewModel: BaseViewModel {
         }
     }
     
-    private func removeLocalFile(_ url: URL) {
+    func removeLocalFile() {
         guard url.isFileURL else { return }
         
         let path = url.path
@@ -83,8 +76,6 @@ final class ResultViewModel: BaseViewModel {
             print("⚠️ Failed to remove file:", error)
         }
     }
-    
-    
     
     
     enum SaveState {

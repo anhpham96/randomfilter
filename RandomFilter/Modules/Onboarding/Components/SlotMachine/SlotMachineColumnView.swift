@@ -10,11 +10,7 @@ import SwiftUI
 
 struct SlotMachineCollumnView: View {
     
-    var items: [String] = [
-        "onboarding.outfit.1",
-        "onboarding.outfit.2",
-        "onboarding.outfit.3",
-    ]
+    var items: [String]
     
     var direction: SlotMachineDirection = .down
     
@@ -96,10 +92,7 @@ struct SlotMachineCollumnView: View {
     VStack {
         Spacer()
         HStack {
-            SlotMachineCollumnView(direction: .up)
-            SlotMachineCollumnView(direction: .down)
-            SlotMachineCollumnView(direction: .up)
-            SlotMachineCollumnView(direction: .down)
+            SlotMachineCollumnView(items: [], direction: .up)
         }
         Spacer()
     }
