@@ -88,7 +88,9 @@ final class HomeViewModel: BaseViewModel {
         
         sessionManager.$currentInput
             .sink { [weak self] currentInput in
-                self?.hasTorch = currentInput?.device.hasTorch ?? false
+                DispatchQueue.main.async(execute: {
+                    self?.hasTorch = currentInput?.device.hasTorch ?? false
+                })
             }.store(in: &bag)
     }
     

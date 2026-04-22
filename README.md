@@ -1,8 +1,15 @@
 
 # 📸 Random Filter  
   
+<p align="center">
+  <img src="https://github.com/anhpham96/randomfilter/blob/feature/readme/Demo/AppIcon-Dev.png?raw=true" width="200" />
+  <img src="https://github.com/anhpham96/randomfilter/blob/feature/readme/Demo/AppIcon-Production.png?raw=true" width="200" />
+</p>
+
 Random Filter is a camera app that lets you capture videos with **randomly selected filters**.  
 
+## Demo
+https://www.youtube.com/shorts/Vjt1BDBk4mY
 
 ## 🚀 Build  
   
@@ -25,6 +32,7 @@ open RandomFilter.xcodeproj
 -   Press `Cmd + R` to build & run
 
 **If using a real device, make sure it’s connected and trusted**
+
 
 ## 🚀 Features
 
@@ -65,6 +73,9 @@ open RandomFilter.xcodeproj
 - Separate configuration for each environment (Admob_Id, AppIcon)
 
 ## 🧭 Future Improvements
+### 🌍 Localization
+- Support multiple languages for UI text
+- Use `Localizable.strings` structure
 
 ### 🎥 Video Recording (GPU Pipeline Upgrade)
 - Current:
@@ -116,3 +127,30 @@ open RandomFilter.xcodeproj
 - Solution direction:
   - Migrate Interstitial Ads from AdMob to AppLovin
   - Keep AdMob for other ad formats if needed (e.g., banner / backup network)
+  
+### 🧩 Refactor & Testing
+- Refactor codebase to reduce coupling between modules
+- Apply clean architecture principles (separation of concerns)
+- Introduce dependency injection for better testability
+- Extract business logic away from UI layer
+
+### 🧪 Unit Testing
+- Write unit tests for core business logic
+- Mock dependencies to isolate test cases
+- Ensure critical flows are covered:
+  - Camera recording flow
+  - Subscription / Paywall logic
+  - Filter pipeline (future)
+
+### 🚀 CI/CD (Xcode Cloud)
+- Setup Xcode Cloud for automated build & deploy
+- Configure workflows for:
+  - Dev (internal testing / TestFlight)
+  - Production (App Store release)
+- Automate:
+  - Build & archive
+  - Unit test execution
+  - Beta distribution via TestFlight
+- Manage environment configs (Dev / Prod) via scheme
+
+
