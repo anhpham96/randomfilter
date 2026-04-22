@@ -50,8 +50,9 @@ final class HomeViewModel: BaseViewModel {
     let recorder = VideoRecorder()
     let permission = CameraPermissionService()
     
-    private let ciContext = CIContext()
-    
+    private let ciContext = CIContext(
+        mtlDevice: MTLCreateSystemDefaultDevice()!
+    )
     private let videoProcessor: VideoFrameProcessor
     private let audioProcessor: AudioFrameProcessor
     
@@ -87,7 +88,9 @@ final class HomeViewModel: BaseViewModel {
         
         sessionManager.$currentInput
             .sink { [weak self] currentInput in
-                self?.hasTorch = currentInput?.device.hasTorch ?? false
+                DispatchQueue.main.async(execute: {
+                    self?.hasTorch = currentInput?.device.hasTorch ?? false
+                })
             }.store(in: &bag)
     }
     
@@ -154,8 +157,11 @@ final class HomeViewModel: BaseViewModel {
     }
     
     func toggleTorch() {
-        sessionManager.toggleTorch { _ in
-            
+        sessionManager.toggleTorch { isTorchOn  in
+            DispatchQueue.main.async {
+                
+                self.isTorchOn = isTorchOn
+            }
         }
     }
     

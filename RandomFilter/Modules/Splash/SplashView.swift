@@ -16,6 +16,7 @@ struct SplashView: View {
 
     var body: some View {
         mainView
+        .statusBarHidden(true)
         .onReceive(viewModel.event, perform: handleEvent)
         .onAppear {
             

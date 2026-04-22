@@ -24,7 +24,7 @@ struct RandomFilterApp: App {
     
     var body: some Scene {
         WindowGroup {
-            RootView()
+            RootView(viewModelFactory: ViewModelFactory())
                 .environmentObject(router)
                 .environmentObject(purchaseManager)
                 .environmentObject(nativeAdManager)
