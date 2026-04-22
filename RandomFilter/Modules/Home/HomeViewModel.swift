@@ -50,8 +50,9 @@ final class HomeViewModel: BaseViewModel {
     let recorder = VideoRecorder()
     let permission = CameraPermissionService()
     
-    private let ciContext = CIContext()
-    
+    private let ciContext = CIContext(
+        mtlDevice: MTLCreateSystemDefaultDevice()!
+    )
     private let videoProcessor: VideoFrameProcessor
     private let audioProcessor: AudioFrameProcessor
     
@@ -154,8 +155,8 @@ final class HomeViewModel: BaseViewModel {
     }
     
     func toggleTorch() {
-        sessionManager.toggleTorch { _ in
-            
+        sessionManager.toggleTorch { isTorchOn  in
+            self.isTorchOn = isTorchOn
         }
     }
     

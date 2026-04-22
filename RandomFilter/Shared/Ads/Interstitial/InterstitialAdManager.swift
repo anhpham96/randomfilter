@@ -39,46 +39,38 @@ final class InterstitialAdManager: NSObject, FullScreenContentDelegate {
                 return
         }
             
-            guard let rootVC = Self.topViewController() else {
-                onDismiss()
-                return
-            }
-            
-            self.onDismiss = onDismiss
-            ad.fullScreenContentDelegate = self
-            ad.present(from: rootVC)
-        }
+        self.onDismiss = onDismiss
+        ad.present(from: nil)
+    }
+
+    
+    
+    func adDidRecordImpression(_ ad: FullScreenPresentingAd) {
+      print("\(#function) called")
+    }
+
+    func adDidRecordClick(_ ad: FullScreenPresentingAd) {
+      print("\(#function) called")
+    }
+
+    func ad(
+      _ ad: FullScreenPresentingAd,
+      didFailToPresentFullScreenContentWithError error: Error
+    ) {
+      print("\(#function) called")
+    }
+
+    func adWillPresentFullScreenContent(_ ad: FullScreenPresentingAd) {
+      print("\(#function) called")
+    }
+
+    func adWillDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
+      print("\(#function) called")
+    }
 
     func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
         interstitialAd = nil
         onDismiss?()
-        Task { await load() } // preload lại
     }
-    
 
-}
-
-extension InterstitialAdManager {
-    static func topViewController(
-        base: UIViewController? = UIApplication.shared
-            .connectedScenes
-            .compactMap { ($0 as? UIWindowScene)?.keyWindow }
-            .first?
-            .rootViewController
-    ) -> UIViewController? {
-        
-        if let nav = base as? UINavigationController {
-            return topViewController(base: nav.visibleViewController)
-        }
-        
-        if let tab = base as? UITabBarController {
-            return topViewController(base: tab.selectedViewController)
-        }
-        
-        if let presented = base?.presentedViewController {
-            return topViewController(base: presented)
-        }
-        
-        return base
-    }
 }
