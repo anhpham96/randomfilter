@@ -44,7 +44,6 @@ final class HomeViewModel: BaseViewModel {
     let permission = CameraPermissionService()
     
     private let ciContext = CIContext()
-    private let recordQueue = DispatchQueue(label: "camera.record.queue", qos: .userInitiated)
     
     private let videoProcessor: VideoFrameProcessor
     private let audioProcessor: AudioFrameProcessor
@@ -72,10 +71,7 @@ final class HomeViewModel: BaseViewModel {
         videoProcessor.previewContinuation = previewContinuation
         bindProcessor()
         
-        sessionManager.configure(
-            recordQueue: recordQueue,
-            delegate: self
-        )
+        sessionManager.configure(delegate: self)
         
         sessionManager.$cameraPosition
             .sink { [weak self] position in

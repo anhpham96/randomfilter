@@ -32,7 +32,7 @@ final class VideoRecorder {
     private var config = Config()
     
     // MARK: - Queue
-    private let recordQueue = DispatchQueue(label: "video.record.queue", qos: .userInitiated)
+    private let recordQueue = DispatchQueue(label: QueueLabel.videoRecord.rawValue, qos: .userInitiated)
     
     // MARK: - Writer
     private var writer: AVAssetWriter?

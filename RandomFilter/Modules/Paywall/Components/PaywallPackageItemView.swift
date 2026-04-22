@@ -23,7 +23,7 @@ struct PaywallPackageItemView: View {
                     .font(.quickSand(priceTextSize))
                     .bold()
                 if let weeklyPrice = item.weeklyPrice {
-                    Text(Str.weeklyPriceTitle(priceTitle: weeklyPrice.currencyFormat()))
+                    Text("\(weeklyPrice.currencyFormat())/week")
                         .font(.quickSand(10))
                         .bold()
                         .foregroundColor(titleColor)
@@ -55,7 +55,7 @@ struct PaywallPackageItemView: View {
                 )
                 .shadowBorder(shadowOffset: CGSize(width: 0, height: 10))
                 .overlay {
-                    Text(Str.bestOffer)
+                    Text(Str.bestOffer.value)
                         .font(.quickSand(12))
                         .bold()
                         .padding(.horizontal, 10)

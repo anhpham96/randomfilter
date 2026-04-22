@@ -8,5 +8,6 @@
 
 enum QueueLabel: String {
     case cameraSession = "camera.session.queue"
+    case captureOutput = "camera.captureOutput.queue"
     case videoRecord = "video.record.queue"
 }

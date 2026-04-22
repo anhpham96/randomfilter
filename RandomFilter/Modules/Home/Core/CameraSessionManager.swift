@@ -14,7 +14,8 @@ final class CameraSessionManager: NSObject {
     let session = AVCaptureSession()
     
     private let sessionQueue = DispatchQueue(label: QueueLabel.cameraSession.rawValue)
-    
+    private let captureOutputQueue = DispatchQueue(label: QueueLabel.captureOutput.rawValue)
+
     private(set) var currentInput: AVCaptureDeviceInput?
     
     let videoOutput = AVCaptureVideoDataOutput()
@@ -29,8 +30,7 @@ final class CameraSessionManager: NSObject {
     
     @Published private(set) var cameraPosition: AVCaptureDevice.Position = .back
     
-    func configure(recordQueue: DispatchQueue,
-                   delegate: AVCaptureVideoDataOutputSampleBufferDelegate &
+    func configure(delegate: AVCaptureVideoDataOutputSampleBufferDelegate &
                    AVCaptureAudioDataOutputSampleBufferDelegate) {
         
         sessionQueue.async { [weak self] in
@@ -41,7 +41,7 @@ final class CameraSessionManager: NSObject {
             
             self.setupVideoInput()
             self.setupAudioInput()
-            self.setupOutputs(queue: recordQueue, delegate: delegate)
+            self.setupOutputs(delegate: delegate)
             
             self.session.commitConfiguration()
         }
@@ -66,7 +66,7 @@ final class CameraSessionManager: NSObject {
         session.addInput(input)
     }
     
-    private func setupOutputs(queue: DispatchQueue,
+    private func setupOutputs(
                               delegate: AVCaptureVideoDataOutputSampleBufferDelegate &
                               AVCaptureAudioDataOutputSampleBufferDelegate) {
         
@@ -74,8 +74,8 @@ final class CameraSessionManager: NSObject {
             kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
         ]
         
-        videoOutput.setSampleBufferDelegate(delegate, queue: queue)
-        audioOutput.setSampleBufferDelegate(delegate, queue: queue)
+        videoOutput.setSampleBufferDelegate(delegate, queue: captureOutputQueue)
+        audioOutput.setSampleBufferDelegate(delegate, queue: captureOutputQueue)
         
         if session.canAddOutput(videoOutput) { session.addOutput(videoOutput) }
         if session.canAddOutput(audioOutput) { session.addOutput(audioOutput) }
