@@ -31,7 +31,7 @@ final class VideoRecorder {
     
     private var config = Config()
     
-    // MARK: - Queue (IMPORTANT)
+    // MARK: - Queue
     private let recordQueue = DispatchQueue(label: "video.record.queue", qos: .userInitiated)
     
     // MARK: - Writer
@@ -137,7 +137,6 @@ final class VideoRecorder {
                   let input = self.videoInput,
                   let adaptor = self.adaptor else { return }
                 
-                // 🔥 START SESSION (FIX CRASH)
             if self.startTime == nil {
                 if writer.status == .failed {
                     print("❌ writer failed:", writer.error as Any)

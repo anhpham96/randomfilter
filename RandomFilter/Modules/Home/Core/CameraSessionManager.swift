@@ -13,7 +13,7 @@ final class CameraSessionManager: NSObject {
     
     let session = AVCaptureSession()
     
-    private let sessionQueue = DispatchQueue(label: "camera.session.queue")
+    private let sessionQueue = DispatchQueue(label: QueueLabel.cameraSession.rawValue)
     
     private(set) var currentInput: AVCaptureDeviceInput?
     
