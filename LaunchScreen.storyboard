@@ -17,18 +17,16 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="random.mask" translatesAutoresizingMaskIntoConstraints="NO" id="OU3-dX-FDY">
-                                <rect key="frame" x="16" y="0.0" width="361" height="454"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="454" id="Ior-tQ-XfJ"/>
-                                </constraints>
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="784"/>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
                         <color key="backgroundColor" name="background.primary.300"/>
                         <constraints>
                             <constraint firstItem="OU3-dX-FDY" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="1mr-1A-qdW"/>
-                            <constraint firstItem="OU3-dX-FDY" firstAttribute="leading" secondItem="Bcu-3y-fUS" secondAttribute="leading" constant="16" id="8Gc-R0-Qhj"/>
-                            <constraint firstItem="Bcu-3y-fUS" firstAttribute="trailing" secondItem="OU3-dX-FDY" secondAttribute="trailing" constant="16" id="nVI-Sq-dyh"/>
+                            <constraint firstItem="OU3-dX-FDY" firstAttribute="leading" secondItem="Bcu-3y-fUS" secondAttribute="leading" id="JCd-jY-KSd"/>
+                            <constraint firstItem="Bcu-3y-fUS" firstAttribute="trailing" secondItem="OU3-dX-FDY" secondAttribute="trailing" id="lrD-k2-Zz5"/>
+                            <constraint firstItem="Bcu-3y-fUS" firstAttribute="bottom" secondItem="OU3-dX-FDY" secondAttribute="bottom" id="ouS-zF-eqa"/>
                         </constraints>
                     </view>
                 </viewController>

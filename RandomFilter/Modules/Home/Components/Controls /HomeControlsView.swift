@@ -15,6 +15,13 @@ struct HomeControlsView: View {
 
     var body: some View {
        content
+            .opacity(viewModel.isCountingDown ? 0 : 1)
+            .overlay(content: {
+                if viewModel.isCountingDown {
+                    CountdownTextView(seconds: viewModel.countdownSeconds)
+                }
+               
+            })
             .onAppear {
                 loadAd()
             }
@@ -31,10 +38,17 @@ struct HomeControlsView: View {
                 adsView
                 VStack {
                     premiumButton
-                    flashButton
+                    
+                    if viewModel.hasTorch {
+                        flashButton
+                    }
+                    
                     if !viewModel.isRecording {
                         switchCameraButton
+                        countdownButton
                     }
+                                    
+                        
                 }
                 .trailingAlignment()
             }
@@ -48,9 +62,7 @@ struct HomeControlsView: View {
             
             ZStack {
                 RecordButton(isRecording: viewModel.isRecording, progress: viewModel.progress) {
-                    viewModel.isRecording ?
-                    viewModel.stopRecord() :
-                    viewModel.startRecord()
+                    viewModel.tapOnRecordingButton()
                 }
                 
             }
@@ -90,6 +102,25 @@ private extension HomeControlsView {
         CameraControlButton(systemName: systemName, action: {
             viewModel.toggleTorch()
         })
+    }
+    
+    var countdownButton: some View {
+        CameraControlButton(
+            systemName: "timer",
+            action: {
+                viewModel.isCountdownOn.toggle()
+            }
+        )
+        .overlay(alignment: .bottomTrailing) {
+            if viewModel.isCountdownOn {
+                Text("\(viewModel.limitTimer)")
+                    .foregroundColor(.white)
+                    .font(.quickSand(12))
+                    .bold()
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+            }
+        }
     }
     
     var switchCameraButton: some View {

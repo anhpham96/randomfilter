@@ -28,6 +28,10 @@ final class CameraSessionManager: NSObject {
         currentInput?.device.position == .front
     }
     
+    var hasTorch: Bool {
+        currentInput?.device.hasTorch ?? false
+    }
+    
     @Published private(set) var cameraPosition: AVCaptureDevice.Position = .back
     
     func configure(delegate: AVCaptureVideoDataOutputSampleBufferDelegate &
