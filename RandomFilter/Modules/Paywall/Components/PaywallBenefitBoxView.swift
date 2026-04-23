@@ -10,7 +10,7 @@ import SwiftUI
 struct PaywallBenefitBoxView: View {
     
     private let columns = [
-        GridItem(.flexible(), alignment: .leading), // rộng hơn
+        GridItem(.flexible(), alignment: .leading),
         GridItem(.fixed(50), alignment: .center),
         GridItem(.fixed(60), alignment: .center)
     ]

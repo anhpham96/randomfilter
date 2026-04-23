@@ -14,8 +14,9 @@ final class CameraSessionManager: NSObject {
     let session = AVCaptureSession()
     
     private let sessionQueue = DispatchQueue(label: QueueLabel.cameraSession.rawValue)
-    private let captureOutputQueue = DispatchQueue(label: QueueLabel.captureOutput.rawValue)
-
+    private let videoQueue = DispatchQueue(label: QueueLabel.cameraVideoQueue.rawValue, qos: .userInteractive)
+    private let audioQueue = DispatchQueue(label: QueueLabel.cameraAudioQueue.rawValue, qos: .utility)
+    
     @Published private(set) var currentInput: AVCaptureDeviceInput?
     
     let videoOutput = AVCaptureVideoDataOutput()
@@ -78,8 +79,8 @@ final class CameraSessionManager: NSObject {
             kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
         ]
         
-        videoOutput.setSampleBufferDelegate(delegate, queue: captureOutputQueue)
-        audioOutput.setSampleBufferDelegate(delegate, queue: captureOutputQueue)
+        videoOutput.setSampleBufferDelegate(delegate, queue: videoQueue)
+        audioOutput.setSampleBufferDelegate(delegate, queue: audioQueue)
         
         if session.canAddOutput(videoOutput) { session.addOutput(videoOutput) }
         if session.canAddOutput(audioOutput) { session.addOutput(audioOutput) }

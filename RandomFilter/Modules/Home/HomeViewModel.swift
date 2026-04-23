@@ -170,7 +170,7 @@ final class HomeViewModel: BaseViewModel {
     }
     
     func startCountdown() {
-        countdownTask?.cancel() // tránh chạy trùng
+        countdownTask?.cancel()
         
         countdownTask = Task {
             countdownSeconds = limitTimer
