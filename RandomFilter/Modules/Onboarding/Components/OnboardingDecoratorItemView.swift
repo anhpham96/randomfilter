@@ -14,7 +14,7 @@ struct OnboardingDecoratorItemView: View {
     
     var body: some View {
         content
-            .scaleEffect(isAnimating ? 1.05 : 0.95) // độ to nhỏ
+            .scaleEffect(isAnimating ? 1.05 : 0.95)
             .offset(x: item.offset.x, y: item.offset.y)
             .onAppear {
                 withAnimation(
