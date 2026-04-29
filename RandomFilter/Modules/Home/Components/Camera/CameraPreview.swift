@@ -30,6 +30,7 @@ struct CameraPreview: UIViewRepresentable {
         )
         view.addGestureRecognizer(pinchGesture)
         
+        context.coordinator.previewLayer = previewLayer
         context.coordinator.viewModel = viewModel
 
         

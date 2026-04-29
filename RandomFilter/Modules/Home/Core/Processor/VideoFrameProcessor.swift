@@ -12,7 +12,6 @@ import CoreImage
 final class VideoFrameProcessor {
     
     var isFrontCamera: Bool
-    var previewContinuation: AsyncStream<CIImage>.Continuation?
     
     var onFirstFrame: ((CMTime) -> Void)?
     var onProgress: ((Double) -> Void)?
@@ -44,29 +43,14 @@ final class VideoFrameProcessor {
     func process(pixelBuffer: CVPixelBuffer,
                 time: CMTime,
                 isRecording: Bool) {
-            
-            let image = makeCIImage(from: pixelBuffer)
-            
-            sendPreview(image)
-            
             guard isRecording else { return }
-            
+            let image = makeCIImage(from: pixelBuffer)
             handleRecordingStartIfNeeded(time: time)
-            
             updateProgress(time: time)
-            
             checkAutoStop(time: time)
-            
             recordFrame(image: image, time: time)
     }
     
-}
-
-private extension VideoFrameProcessor {
-    
-    func sendPreview(_ image: CIImage) {
-        previewContinuation?.yield(image)
-    }
 }
 
 private extension VideoFrameProcessor {
