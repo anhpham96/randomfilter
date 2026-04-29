@@ -83,6 +83,11 @@ final class HomeViewModel: BaseViewModel {
                     self?.hasTorch = currentInput?.device.hasTorch ?? false
                 })
             }.store(in: &bag)
+        
+        $selectedDuration
+            .sink { [weak self] selectedDuration in
+                self?.videoProcessor.updateSelectedDuration(selectedDuration)
+            }.store(in: &bag)
     }
     
     private func bindProcessor() {
