@@ -12,7 +12,8 @@ import CoreImage
 final class VideoFrameProcessor {
     
     var isFrontCamera: Bool
-    
+    var selectedDuration: Double
+
     var onFirstFrame: ((CMTime) -> Void)?
     var onProgress: ((Double) -> Void)?
     var onStopRequested: (() -> Void)?
@@ -20,7 +21,6 @@ final class VideoFrameProcessor {
     private var recordStartTime: CMTime?
     private var didStopForDuration = false
     
-    private let selectedDuration: Double
     private let recorder: VideoRecorder
     private let ciContext: CIContext
     
@@ -51,6 +51,10 @@ final class VideoFrameProcessor {
             recordFrame(image: image, time: time)
     }
     
+    
+    func updateSelectedDuration(_ selectedDuration: Double) {
+        self.selectedDuration = selectedDuration
+    }
 }
 
 private extension VideoFrameProcessor {
