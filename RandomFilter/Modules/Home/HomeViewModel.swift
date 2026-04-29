@@ -56,14 +56,6 @@ final class HomeViewModel: BaseViewModel {
     private let videoProcessor: VideoFrameProcessor
     private let audioProcessor: AudioFrameProcessor
     
-    private var previewContinuation: AsyncStream<CIImage>.Continuation?
-    
-    lazy var previewStream: AsyncStream<CIImage> = {
-        AsyncStream { continuation in
-            self.previewContinuation = continuation
-        }
-    }()
-    
     // MARK: - Init
     
     override init() {
@@ -76,7 +68,6 @@ final class HomeViewModel: BaseViewModel {
         self.audioProcessor = AudioFrameProcessor(recorder: recorder)
         
         super.init()
-        videoProcessor.previewContinuation = previewContinuation
         bindProcessor()
         
         sessionManager.configure(delegate: self)
